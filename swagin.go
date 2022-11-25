@@ -9,8 +9,8 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gin-gonic/gin"
-	"github.com/long2ice/swagin/router"
-	"github.com/long2ice/swagin/swagger"
+	"github.com/pubgo/opendoc/router"
+	"github.com/pubgo/opendoc/swagger"
 )
 
 //go:embed templates/*

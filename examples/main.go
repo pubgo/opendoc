@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/long2ice/swagin"
-	"github.com/long2ice/swagin/security"
+	"github.com/pubgo/opendoc"
+	"github.com/pubgo/opendoc/security"
 	"log"
 )
 

@@ -17,3 +17,4 @@
 
 # VScode configuration file
 .vscode
+/vendor

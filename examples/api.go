@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/long2ice/swagin/security"
+	"github.com/pubgo/opendoc/security"
 	"mime/multipart"
 	"net/http"
 )

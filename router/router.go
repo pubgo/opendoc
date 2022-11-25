@@ -10,8 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
-	"github.com/long2ice/swagin/security"
 	"github.com/mcuadros/go-defaults"
+	"github.com/pubgo/opendoc/security"
 )
 
 type Model any

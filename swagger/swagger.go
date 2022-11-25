@@ -11,8 +11,8 @@ import (
 	"github.com/fatih/structtag"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/long2ice/swagin/router"
-	"github.com/long2ice/swagin/security"
+	"github.com/pubgo/opendoc/router"
+	"github.com/pubgo/opendoc/security"
 	"gopkg.in/yaml.v2"
 )
 

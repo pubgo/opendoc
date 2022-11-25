@@ -2,8 +2,8 @@ package swagin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/long2ice/swagin/router"
-	"github.com/long2ice/swagin/security"
+	"github.com/pubgo/opendoc/router"
+	"github.com/pubgo/opendoc/security"
 	"net/http"
 )
 

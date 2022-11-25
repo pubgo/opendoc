@@ -2,7 +2,7 @@ package swagger
 
 import (
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/long2ice/swagin/router"
+	"github.com/pubgo/opendoc/router"
 )
 
 type Option func(swagger *Swagger)
