@@ -7,12 +7,12 @@
     <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js" charset="UTF-8"></script>
 </head>
 <body>
-<div id="swagger-ui"></div>
+<div id="openapi"></div>
 <script>
-    let options = JSON.parse('{{ .swagger_options }}')
-    const ui = SwaggerUIBundle({
+    let options = JSON.parse('{{ .openapi_options }}')
+    SwaggerUIBundle({
         url: "{{ .openapi_url }}",
-        dom_id: '#swagger-ui',
+        dom_id: '#openapi',
         presets: [
             SwaggerUIBundle.presets.apis,
         ],

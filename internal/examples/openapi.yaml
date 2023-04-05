@@ -1,0 +1,283 @@
+components:
+    schemas:
+        TestNoModelReq.main:
+            type: object
+        TestQueryReq.main:
+            type: object
+        TestQueryReq1.main:
+            properties:
+                name:
+                    default: test
+                    description: name of model
+                    nullable: true
+                    type: string
+                rsp:
+                    $ref: '#/components/schemas/TestQueryRsp.main'
+            required:
+                - name
+                - rsp
+            type: object
+        TestQueryRsp.main:
+            properties:
+                name:
+                    default: test
+                    description: name of model
+                    nullable: true
+                    type: string
+                optional:
+                    nullable: true
+                    type: string
+                req:
+                    $ref: '#/components/schemas/TestQueryReq.main'
+                token:
+                    default: test
+                    nullable: true
+                    type: string
+            required:
+                - name
+                - token
+                - optional
+                - req
+            type: object
+    securitySchemes:
+        Basic:
+            scheme: basic
+            type: http
+        Bearer:
+            bearerFormat: JWT
+            scheme: bearer
+            type: http
+info:
+    contact:
+        email: long2ice@gmail.com
+        name: long2ice
+        url: https://github.com/pubgo/opendoc
+    description: this is description
+    license:
+        name: Apache License 2.0
+        url: https://github.com/pubgo/opendoc/blob/dev/LICENSE
+    termsOfService: https://github.com/long2ice
+    title: title-service
+    version: v0.0.1-dev-99
+openapi: 3.0.0
+paths:
+    /api/v1/no_model:
+        post:
+            operationId: no_model_opt
+            parameters:
+                - in: header
+                  name: authorization
+                  required: true
+                  schema:
+                    default: authorization
+                    type: string
+                - in: header
+                  name: token
+                  required: true
+                  schema:
+                    default: token
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                    description: OK
+                default:
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                    description: OK
+            security:
+                - Basic: []
+                - Bearer: []
+            summary: Test no model
+            tags:
+                - test
+    /api/v1/v1/articles:
+        get:
+            operationId: article_list
+            parameters:
+                - description: name of model
+                  in: query
+                  name: name
+                  required: true
+                  schema:
+                    default: test
+                    type: string
+                - in: header
+                  name: token
+                  required: true
+                  schema:
+                    default: test
+                    type: string
+                - in: query
+                  name: optional
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    name:
+                                        default: test
+                                        description: name of model
+                                        nullable: true
+                                        type: string
+                                    optional:
+                                        nullable: true
+                                        type: string
+                                    req:
+                                        $ref: '#/components/schemas/TestQueryReq.main'
+                                    token:
+                                        default: test
+                                        nullable: true
+                                        type: string
+                                required:
+                                    - name
+                                    - token
+                                    - optional
+                                    - req
+                                type: object
+                    description: OK
+                default:
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    name:
+                                        default: test
+                                        description: name of model
+                                        nullable: true
+                                        type: string
+                                    optional:
+                                        nullable: true
+                                        type: string
+                                    req:
+                                        $ref: '#/components/schemas/TestQueryReq.main'
+                                    token:
+                                        default: test
+                                        nullable: true
+                                        type: string
+                                required:
+                                    - name
+                                    - token
+                                    - optional
+                                    - req
+                                type: object
+                    description: OK
+            security:
+                - Basic: []
+                - Bearer: []
+            summary: Test query list model
+            tags:
+                - test
+    /api/v1/v1/articles/{id}:
+        put:
+            operationId: article_update
+            parameters:
+                - description: id of model
+                  in: path
+                  name: id
+                  required: true
+                  schema:
+                    default: "1"
+                    type: integer
+                - in: header
+                  name: token
+                  required: true
+                  schema:
+                    default: test
+                    type: string
+                - in: query
+                  name: optional
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                name:
+                                    default: test
+                                    description: name of model
+                                    nullable: true
+                                    type: string
+                                rsp:
+                                    $ref: '#/components/schemas/TestQueryRsp.main'
+                            required:
+                                - name
+                                - rsp
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    name:
+                                        default: test
+                                        description: name of model
+                                        nullable: true
+                                        type: string
+                                    optional:
+                                        nullable: true
+                                        type: string
+                                    req:
+                                        $ref: '#/components/schemas/TestQueryReq.main'
+                                    token:
+                                        default: test
+                                        nullable: true
+                                        type: string
+                                required:
+                                    - name
+                                    - token
+                                    - optional
+                                    - req
+                                type: object
+                    description: OK
+                default:
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    name:
+                                        default: test
+                                        description: name of model
+                                        nullable: true
+                                        type: string
+                                    optional:
+                                        nullable: true
+                                        type: string
+                                    req:
+                                        $ref: '#/components/schemas/TestQueryReq.main'
+                                    token:
+                                        default: test
+                                        nullable: true
+                                        type: string
+                                required:
+                                    - name
+                                    - token
+                                    - optional
+                                    - req
+                                type: object
+                    description: OK
+            security:
+                - Basic: []
+                - Bearer: []
+            summary: Test query list model
+            tags:
+                - test
