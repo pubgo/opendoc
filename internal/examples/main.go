@@ -12,44 +12,41 @@ func main() {
 	defer recovery.Exit()
 
 	var doc = opendoc.New(func(swag *opendoc.Swagger) {
-		swag.Config.Title = "title-service"
+		swag.Config.Title = "this service web title "
 		swag.Description = "this is description"
 		swag.License = &opendoc.License{
 			Name: "Apache License 2.0",
-			URL:  "https://github.com/pubgo/opendoc/blob/dev/LICENSE",
+			URL:  "https://github.com/pubgo/opendoc/blob/master/LICENSE",
 		}
 
 		swag.Contact = &opendoc.Contact{
-			Name:  "long2ice",
+			Name:  "barry",
 			URL:   "https://github.com/pubgo/opendoc",
-			Email: "long2ice@gmail.com",
+			Email: "kooksee@163.com",
 		}
 
-		swag.TermsOfService = "https://github.com/long2ice"
+		swag.TermsOfService = "https://github.com/pubgo"
 	})
 
-	doc.ServiceOf("test", func(srv *opendoc.Service) {
+	doc.ServiceOf("test article service", func(srv *opendoc.Service) {
 		srv.SetPrefix("/api/v1")
 		srv.AddSecurity(security.Basic{}, security.Bearer{})
 		srv.PostOf(func(op *opendoc.Operation) {
-			op.SetPath("no_model_opt", "/no_model")
-			op.SetModel(new(TestNoModelReq), new(TestNoModelReq))
-			op.SetSummary("Test no model")
-			op.SetDescription("Test no model")
+			op.SetPath("article_create", "/articles")
+			op.SetModel(new(TestQueryReq1), new(TestQueryRsp))
+			op.SetDescription("create article")
 		})
 
 		srv.GetOf(func(op *opendoc.Operation) {
-			op.SetPath("article_list", "/v1/articles")
+			op.SetPath("article_list", "/articles")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
-			op.SetSummary("get article list")
-			op.SetDescription("Test query list model")
+			op.SetDescription("get article list")
 		})
 
 		srv.PutOf(func(op *opendoc.Operation) {
-			op.SetPath("article_update", "/v1/articles/{id}")
+			op.SetPath("article_update", "/articles/{id}")
 			op.SetModel(new(TestQueryReq1), new(TestQueryRsp))
-			op.SetSummary("delete article")
-			op.SetDescription("Test query list model")
+			op.SetDescription("update article")
 		})
 	})
 

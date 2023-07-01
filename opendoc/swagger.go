@@ -10,14 +10,13 @@ import (
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/funk/version"
 
-	"github.com/pubgo/opendoc/config"
 	"github.com/pubgo/opendoc/templates"
 )
 
 type Swagger struct {
 	rootPath string
 
-	Config         *config.Config
+	Config         *Config
 	Description    string
 	Version        string
 	TermsOfService string
@@ -41,13 +40,13 @@ func (s *Swagger) ServiceOf(name string, cb func(srv *Service)) {
 
 func (s *Swagger) buildSwagger() *openapi3.T {
 	if s.Config == nil {
-		s.Config = config.DefaultCfg()
+		s.Config = DefaultCfg()
 	}
 
 	var t = &openapi3.T{
 		OpenAPI:    "3.0.0",
 		Servers:    s.Servers,
-		Components: components,
+		Components: &components,
 		Info: &openapi3.Info{
 			Title:          s.Config.Title,
 			Description:    s.Description,
@@ -73,8 +72,8 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 }
 
 func (s *Swagger) InitRouter(r fiber.Router) {
-	r.Get(s.Config.OpenapiRouter, templates.SwaggerHandler(s.Config))
-	r.Get(s.Config.OpenapiRedocRouter, templates.ReDocHandler(s.Config))
+	r.Get(s.Config.OpenapiRouter, templates.SwaggerHandler(s.Config.Title, s.Config.OpenapiUrl))
+	r.Get(s.Config.OpenapiRedocRouter, templates.ReDocHandler(s.Config.Title, s.Config.OpenapiUrl))
 	r.Get(s.Config.OpenapiUrl, s.OpenapiDataHandler())
 }
 
@@ -101,7 +100,7 @@ func (s *Swagger) MarshalYAML() ([]byte, error) {
 
 func New(handles ...func(swag *Swagger)) *Swagger {
 	swagger := &Swagger{
-		Config:      config.DefaultCfg(),
+		Config:      DefaultCfg(),
 		Description: fmt.Sprintf("project:%s version:%s commit:%s", version.Project(), version.Version(), version.CommitID()),
 		Version:     version.Version(),
 	}

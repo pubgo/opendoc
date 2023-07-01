@@ -7,6 +7,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/pubgo/funk/assert"
+
 	"github.com/pubgo/opendoc/security"
 )
 
@@ -53,6 +54,7 @@ func (op *Operation) SetSummary(summary string) *Operation {
 func (op *Operation) SetPath(operationID string, path string) *Operation {
 	assert.If(operationID == "", "operationID should not be nil")
 	assert.If(path == "", "path should not be null")
+
 	op.operationID = operationID
 
 	path = strings.TrimSpace(path)

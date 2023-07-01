@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/pubgo/opendoc/security"
 )
 
@@ -94,7 +95,7 @@ func (s *Service) Openapi() map[string]*openapi3.PathItem {
 	var routes = make(map[string]*openapi3.PathItem)
 	for i := range s.operations {
 		op := s.operations[i]
-		routes[op.path] = op.Openapi()
+		routes[op.method+op.path] = op.Openapi()
 	}
 	return routes
 }

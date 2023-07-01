@@ -9,6 +9,7 @@ const (
 	doc         = "doc"
 	description = "description"
 	validate    = "validate"
+	required    = "required"
 
 	jsonTag   = "json"
 	queryTag  = "query"

@@ -170,7 +170,10 @@ func genSchema(val interface{}) (string, *openapi3.Schema) {
 			}
 
 			fieldSchema = fieldSchema.WithNullable()
-			getTag(tags, nullable, func(_ *structtag.Tag) { fieldSchema.Nullable = false })
+			fieldSchema.AllowEmptyValue = true
+
+			getTag(tags, nullable, func(_ *structtag.Tag) { fieldSchema.Nullable = true })
+			getTag(tags, required, func(_ *structtag.Tag) { fieldSchema.AllowEmptyValue = false })
 			getTag(tags, doc, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
 			getTag(tags, format, func(tag *structtag.Tag) { fieldSchema.Format = tag.Name })
 			getTag(tags, description, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
@@ -291,6 +294,7 @@ func genParameters(val interface{}) openapi3.Parameters {
 			}
 		})
 
+		getTag(tags, required, func(tag *structtag.Tag) { parameter.Required = true })
 		getTag(tags, uriTag, func(tag *structtag.Tag) { parameter = openapi3.NewPathParameter(tag.Name) })
 		getTag(tags, pathTag, func(tag *structtag.Tag) { parameter = openapi3.NewPathParameter(tag.Name) })
 

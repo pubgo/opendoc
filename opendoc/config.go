@@ -1,4 +1,4 @@
-package config
+package opendoc
 
 import "github.com/pubgo/funk/version"
 
