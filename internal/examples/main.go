@@ -8,6 +8,14 @@ import (
 	"github.com/pubgo/opendoc/security"
 )
 
+type TestQueryReqAAA struct {
+	ID       int     `path:"id" validate:"required" json:"id" description:"id of model" default:"1"`
+	Name     string  `required:"true" json:"name" validate:"required" doc:"name of model" default:"test"`
+	Name1    *string `required:"true" json:"name1" validate:"required" doc:"name1 of model" default:"test"`
+	Token    string  `header:"token" json:"token" default:"test"`
+	Optional string  `query:"optional" json:"optional"`
+}
+
 func main() {
 	defer recovery.Exit()
 
@@ -41,6 +49,7 @@ func main() {
 			op.SetPath("article_list", "/articles")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
 			op.SetDescription("get article list")
+			op.AddResponse("Test", new(TestQueryReqAAA))
 		})
 
 		srv.PutOf(func(op *opendoc.Operation) {

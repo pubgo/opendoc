@@ -26,10 +26,31 @@ type Operation struct {
 	securities          []security.Security
 	request             interface{}
 	response            interface{}
+	responses           map[string]*openapi3.ResponseRef
 }
 
 func (op *Operation) AddSecurity(security ...security.Security) *Operation {
 	op.securities = append(op.securities, security...)
+	return op
+}
+
+func (op *Operation) SetExclude(exclude bool) *Operation {
+	op.exclude = exclude
+	return op
+}
+
+func (op *Operation) AddResponse(name string, resp interface{}) *Operation {
+	if op.responses == nil {
+		op.responses = make(map[string]*openapi3.ResponseRef)
+	}
+
+	_, schema := genSchema(resp)
+	op.responses[name] = &openapi3.ResponseRef{
+		Value: &openapi3.Response{
+			Description: &name,
+			Content:     openapi3.NewContentWithSchema(schema, []string{"application/json"}),
+		},
+	}
 	return op
 }
 
@@ -78,13 +99,20 @@ func (op *Operation) Openapi() *openapi3.PathItem {
 		return nil
 	}
 
+	responses := genResponses(op.response, op.responseContentType...)
+	if op.responses != nil {
+		for k, v := range op.responses {
+			responses[k] = v
+		}
+	}
+
 	operation := &openapi3.Operation{
 		Tags:        op.tags,
 		OperationID: op.operationID,
 		Summary:     op.summary,
 		Description: op.description,
 		Deprecated:  op.deprecated,
-		Responses:   genResponses(op.response, op.responseContentType...),
+		Responses:   responses,
 		Parameters:  genParameters(op.request),
 		Security:    getSecurityRequirements(op.securities),
 	}

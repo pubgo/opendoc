@@ -18,3 +18,4 @@
 # VScode configuration file
 .vscode
 /vendor
+.DS_Store
