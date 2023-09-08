@@ -66,9 +66,9 @@ func getCanonicalTypeName(val interface{}) string {
 	path := model.PkgPath()
 	if strings.Contains(path, "/vendor/") {
 		path = path[strings.Index(path, "/vendor/")+len("/vendor/"):]
-	} else if strings.HasPrefix(path, "vendor/") {
-		path = strings.TrimPrefix(path, "vendor/")
 	}
+
+	path = strings.TrimPrefix(path, "vendor/")
 	return path + "." + model.Name()
 }
 
@@ -81,7 +81,7 @@ func getSecurityRequirements(securities []security.Security) *openapi3.SecurityR
 	return securityRequirements
 }
 
-func genSchema(val interface{}) (string, *openapi3.Schema) {
+func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 	var model reflect.Type
 	if _t, ok := val.(reflect.Type); ok {
 		model = _t
@@ -114,7 +114,6 @@ func genSchema(val interface{}) (string, *openapi3.Schema) {
 		return "", &openapi3.Schema{Type: openapi3.TypeString, Format: "uri"}
 	}
 
-	var schema *openapi3.Schema
 	switch model.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Uint, reflect.Uint8, reflect.Uint16:
 		schema = openapi3.NewIntegerSchema()
