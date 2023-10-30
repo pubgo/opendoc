@@ -38,7 +38,7 @@ func (s *Swagger) ServiceOf(name string, cb func(srv *Service)) {
 	cb(srv)
 }
 
-func (s *Swagger) Service() *Service {
+func (s *Swagger) WithService() *Service {
 	var srv = new(Service)
 	srv.prefix = s.rootPath
 	s.Routers = append(s.Routers, srv)
