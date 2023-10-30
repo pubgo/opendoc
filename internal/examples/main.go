@@ -40,22 +40,26 @@ func main() {
 		srv.SetPrefix("/api/v1")
 		srv.AddSecurity(security.Basic{}, security.Bearer{})
 		srv.PostOf(func(op *opendoc.Operation) {
-			op.SetPath("article_create", "/articles")
+			op.SetPath("/articles")
+			op.SetOperation("article_create")
 			op.SetModel(new(TestQueryReq1), new(TestQueryRsp))
 			op.SetSummary("create article")
 		})
 
 		srv.GetOf(func(op *opendoc.Operation) {
-			op.SetPath("article_list", "/articles")
+			op.SetPath("/articles")
+			op.SetOperation("article_list")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
 			op.SetSummary("get article list")
 			op.AddResponse("Test", new(TestQueryReqAAA))
 		})
 
 		srv.PutOf(func(op *opendoc.Operation) {
-			op.SetPath("article_update", "/articles/{id}")
+			op.SetPath("/articles/{id}")
+			op.SetOperation("article_update")
 			op.SetModel(new(TestQueryReq1), new(TestQueryRsp))
 			op.SetSummary("update article")
+			op.AddResponse("error", &TestFileReq{})
 		})
 	})
 

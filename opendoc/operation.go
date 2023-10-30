@@ -97,9 +97,9 @@ func (op *Operation) SetModel(req interface{}, rsp interface{}) *Operation {
 	return op
 }
 
-func (op *Operation) Openapi() *openapi3.PathItem {
+func (op *Operation) Openapi(item *openapi3.PathItem) {
 	if op.exclude {
-		return nil
+		return
 	}
 
 	responses := genResponses(op.response, op.responseContentType...)
@@ -120,7 +120,6 @@ func (op *Operation) Openapi() *openapi3.PathItem {
 		Security:    getSecurityRequirements(op.securities),
 	}
 
-	item := new(openapi3.PathItem)
 	switch op.method {
 	case http.MethodGet:
 		item.Get = operation
@@ -146,6 +145,4 @@ func (op *Operation) Openapi() *openapi3.PathItem {
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 		operation.RequestBody = genRequestBody(op.request, op.requestContentType...)
 	}
-
-	return item
 }

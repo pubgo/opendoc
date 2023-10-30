@@ -100,7 +100,10 @@ func (s *Service) Openapi() map[string]*openapi3.PathItem {
 	var routes = make(map[string]*openapi3.PathItem)
 	for i := range s.operations {
 		op := s.operations[i]
-		routes[op.method+op.path] = op.Openapi()
+		if routes[op.path] == nil {
+			routes[op.path] = new(openapi3.PathItem)
+		}
+		op.Openapi(routes[op.path])
 	}
 	return routes
 }
