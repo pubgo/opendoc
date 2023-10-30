@@ -23,6 +23,11 @@ type Service struct {
 	contentType []string
 }
 
+func (s *Service) SetName(name string) *Service {
+	s.name = name
+	return s
+}
+
 func (s *Service) AddContentType(contentType ...string) *Service {
 	s.contentType = append(s.contentType, contentType...)
 	return s

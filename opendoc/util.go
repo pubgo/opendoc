@@ -114,6 +114,21 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 		return "", &openapi3.Schema{Type: openapi3.TypeString, Format: "uri"}
 	}
 
+	switch v := val.(type) {
+	case OneOfExposer:
+		var refs []*openapi3.SchemaRef
+		for _, s := range v.JSONSchemaOneOf() {
+			ref, schema := genSchema(s)
+			if ref != "" {
+				refs = append(refs, openapi3.NewSchemaRef(ref, nil))
+			} else {
+				refs = append(refs, &openapi3.SchemaRef{Value: schema})
+			}
+		}
+
+		return "", &openapi3.Schema{OneOf: refs}
+	}
+
 	switch model.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Uint, reflect.Uint8, reflect.Uint16:
 		schema = openapi3.NewIntegerSchema()

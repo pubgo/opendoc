@@ -145,10 +145,9 @@ func (op *Operation) Openapi() *openapi3.PathItem {
 		item.Trace = operation
 	}
 
-	requestBody := genRequestBody(op.request, op.requestContentType...)
 	switch op.method {
-	case http.MethodPost, http.MethodPut, http.MethodPatch:
-		operation.RequestBody = requestBody
+	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
+		operation.RequestBody = genRequestBody(op.request, op.requestContentType...)
 	}
 
 	return item

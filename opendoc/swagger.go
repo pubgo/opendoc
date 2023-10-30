@@ -38,6 +38,13 @@ func (s *Swagger) ServiceOf(name string, cb func(srv *Service)) {
 	cb(srv)
 }
 
+func (s *Swagger) Service() *Service {
+	var srv = new(Service)
+	srv.prefix = s.rootPath
+	s.Routers = append(s.Routers, srv)
+	return srv
+}
+
 func (s *Swagger) buildSwagger() *openapi3.T {
 	if s.Config == nil {
 		s.Config = DefaultCfg()
