@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/funk/recovery"
 	"github.com/pubgo/opendoc/opendoc"
 	"github.com/pubgo/opendoc/security"
+	"os"
 )
 
 type TestQueryReqAAA struct {
@@ -42,24 +42,27 @@ func main() {
 		srv.PostOf(func(op *opendoc.Operation) {
 			op.SetPath("article_create", "/articles")
 			op.SetModel(new(TestQueryReq1), new(TestQueryRsp))
-			op.SetDescription("create article")
+			op.SetSummary("create article")
 		})
 
 		srv.GetOf(func(op *opendoc.Operation) {
 			op.SetPath("article_list", "/articles")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
-			op.SetDescription("get article list")
+			op.SetSummary("get article list")
 			op.AddResponse("Test", new(TestQueryReqAAA))
 		})
 
 		srv.PutOf(func(op *opendoc.Operation) {
 			op.SetPath("article_update", "/articles/{id}")
 			op.SetModel(new(TestQueryReq1), new(TestQueryRsp))
-			op.SetDescription("update article")
+			op.SetSummary("update article")
 		})
 	})
 
-	var app = fiber.New()
-	doc.InitRouter(app)
-	assert.Exit(app.Listen("localhost:8080"))
+	data := assert.Must1(doc.MarshalYAML())
+	assert.Exit(os.WriteFile("openapi.yaml", data, 0644))
+
+	//var app = fiber.New()
+	//doc.InitRouter(app)
+	//assert.Exit(app.Listen("localhost:8080"))
 }

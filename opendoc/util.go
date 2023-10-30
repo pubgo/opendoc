@@ -101,7 +101,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 	case reflect.TypeOf(multipart.FileHeader{}):
 		return "", &openapi3.Schema{Type: openapi3.TypeString, Format: "binary"}
 	case reflect.TypeOf([]*multipart.FileHeader{}):
-		schema := openapi3.NewArraySchema()
+		schema = openapi3.NewArraySchema()
 		schema.Items = openapi3.NewSchemaRef("", &openapi3.Schema{Type: openapi3.TypeString, Format: "binary"})
 		return "", schema
 	case reflect.TypeOf(time.Time{}):
@@ -129,7 +129,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 		schema = openapi3.NewBoolSchema()
 	case reflect.Array, reflect.Slice:
 		schema = openapi3.NewArraySchema()
-		schema.Items = openapi3.NewSchemaRef(genSchema(model))
+		schema.Items = openapi3.NewSchemaRef(genSchema(model.Elem()))
 	case reflect.Map:
 		schema = openapi3.NewObjectSchema()
 		schema.Items = openapi3.NewSchemaRef(genSchema(model))
@@ -174,8 +174,9 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			getTag(tags, nullable, func(_ *structtag.Tag) { fieldSchema.Nullable = true })
 			getTag(tags, required, func(_ *structtag.Tag) { fieldSchema.AllowEmptyValue = false })
 			getTag(tags, doc, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
-			getTag(tags, format, func(tag *structtag.Tag) { fieldSchema.Format = tag.Name })
 			getTag(tags, description, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
+			getTag(tags, format, func(tag *structtag.Tag) { fieldSchema.Format = tag.Name })
+			getTag(tags, deprecated, func(tag *structtag.Tag) { fieldSchema.Deprecated = true })
 			getTag(tags, validate, func(tag *structtag.Tag) {
 				desc := fieldSchema.Description
 				if desc == "" {
