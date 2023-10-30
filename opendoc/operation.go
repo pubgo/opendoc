@@ -72,11 +72,8 @@ func (op *Operation) SetSummary(summary string) *Operation {
 	return op
 }
 
-func (op *Operation) SetPath(operationID string, path string) *Operation {
-	assert.If(operationID == "", "operationID should not be nil")
+func (op *Operation) SetPath(path string) *Operation {
 	assert.If(path == "", "path should not be null")
-
-	op.operationID = operationID
 
 	path = strings.TrimSpace(path)
 	path = strings.Trim(path, "/")
