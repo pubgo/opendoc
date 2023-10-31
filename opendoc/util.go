@@ -19,7 +19,7 @@ import (
 
 func getTag(tags *structtag.Tags, key string, fn func(tag *structtag.Tag)) {
 	var tag, err = tags.Get(key)
-	if err == nil {
+	if err == nil && tag.Key != "" {
 		fn(tag)
 	}
 }
