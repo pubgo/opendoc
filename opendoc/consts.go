@@ -10,6 +10,9 @@ const (
 	description = "description"
 	validate    = "validate"
 	required    = "required"
+	readOnly    = "readOnly"
+	writeOnly   = "writeOnly"
+	example     = "example"
 
 	jsonTag   = "json"
 	queryTag  = "query"

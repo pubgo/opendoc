@@ -187,6 +187,9 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			fieldSchema.AllowEmptyValue = true
 
 			getTag(tags, nullable, func(_ *structtag.Tag) { fieldSchema.Nullable = true })
+			getTag(tags, readOnly, func(_ *structtag.Tag) { fieldSchema.ReadOnly = true })
+			getTag(tags, writeOnly, func(_ *structtag.Tag) { fieldSchema.WriteOnly = true })
+			getTag(tags, example, func(tag *structtag.Tag) { fieldSchema.Example = tag.Name })
 			getTag(tags, required, func(_ *structtag.Tag) { fieldSchema.AllowEmptyValue = false })
 			getTag(tags, doc, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
 			getTag(tags, description, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
