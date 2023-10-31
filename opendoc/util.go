@@ -2,6 +2,7 @@ package opendoc
 
 import (
 	"fmt"
+	"github.com/pubgo/funk/log"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/fatih/structtag"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/goccy/go-json"
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/opendoc/security"
 	"k8s.io/kube-openapi/pkg/util"
@@ -189,12 +191,18 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			getTag(tags, nullable, func(_ *structtag.Tag) { fieldSchema.Nullable = true })
 			getTag(tags, readOnly, func(_ *structtag.Tag) { fieldSchema.ReadOnly = true })
 			getTag(tags, writeOnly, func(_ *structtag.Tag) { fieldSchema.WriteOnly = true })
-			getTag(tags, example, func(tag *structtag.Tag) { fieldSchema.Example = tag.Name })
 			getTag(tags, required, func(_ *structtag.Tag) { fieldSchema.AllowEmptyValue = false })
 			getTag(tags, doc, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
 			getTag(tags, description, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
 			getTag(tags, format, func(tag *structtag.Tag) { fieldSchema.Format = tag.Name })
 			getTag(tags, deprecated, func(tag *structtag.Tag) { fieldSchema.Deprecated = true })
+			getTag(tags, defaultName, func(tag *structtag.Tag) { fieldSchema.Default = tag.Name })
+			getTag(tags, example, func(tag *structtag.Tag) {
+				err = json.Unmarshal([]byte(tag.Value()), &fieldSchema.Example)
+				if err != nil {
+					log.Err(err).Str("tag-value", tag.Value()).Msg("failed to unmarshal example")
+				}
+			})
 			getTag(tags, validate, func(tag *structtag.Tag) {
 				desc := fieldSchema.Description
 				if desc == "" {
@@ -204,7 +212,6 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 				}
 				fieldSchema.Description = desc
 			})
-			getTag(tags, defaultName, func(tag *structtag.Tag) { fieldSchema.Default = tag.Name })
 			schema.Properties[tag.Name] = openapi3.NewSchemaRef("", fieldSchema)
 		}
 		return getComponentName(schemaName), schema

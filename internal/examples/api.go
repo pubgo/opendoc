@@ -41,6 +41,7 @@ type TestQueryRsp struct {
 	Name     string        `required:"true" json:"name" doc:"name of model" default:"test"`
 	Token    string        `required:"true" json:"token" default:"test"`
 	Optional *string       `json:"optional"`
+	Types    []string      `json:"types,omitempty" doc:"类型" required:"true" example:"[\"a\",\"b\"]" readOnly:"true"`
 	Req      *TestQueryReq `json:"req" required:"true"`
 }
 
