@@ -105,7 +105,7 @@ func (op *Operation) Openapi(item *openapi3.PathItem) {
 	responses := genResponses(op.response, op.responseContentType...)
 	if op.responses != nil {
 		for k, v := range op.responses {
-			responses[k] = v
+			responses.Set(k, v)
 		}
 	}
 

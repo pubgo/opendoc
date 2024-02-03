@@ -1,21 +1,51 @@
 components:
     schemas:
-        TestNoModelReq.main:
+        TestFileReq.main:
             type: object
         TestQueryReq.main:
+            properties:
+                name1:
+                    default: test
+                    description: name of model validate:required
+                    nullable: true
+                    type: string
+            required:
+                - name1
             type: object
         TestQueryReq1.main:
             properties:
                 name:
                     default: test
-                    description: name of model
+                    description: name of model validate:required
+                    nullable: true
+                    type: string
+                name1:
+                    default: test
+                    description: name1 of model validate:required
                     nullable: true
                     type: string
                 rsp:
                     $ref: '#/components/schemas/TestQueryRsp.main'
             required:
                 - name
+                - name1
                 - rsp
+            type: object
+        TestQueryReqAAA.main:
+            properties:
+                name:
+                    default: test
+                    description: name of model validate:required
+                    nullable: true
+                    type: string
+                name1:
+                    default: test
+                    description: name1 of model validate:required
+                    nullable: true
+                    type: string
+            required:
+                - name
+                - name1
             type: object
         TestQueryRsp.main:
             properties:
@@ -25,6 +55,7 @@ components:
                     nullable: true
                     type: string
                 optional:
+                    allowEmptyValue: true
                     nullable: true
                     type: string
                 req:
@@ -33,6 +64,16 @@ components:
                     default: test
                     nullable: true
                     type: string
+                types:
+                    description: 类型
+                    example:
+                        - a
+                        - b
+                    items:
+                        type: string
+                    nullable: true
+                    readOnly: true
+                    type: array
             required:
                 - name
                 - token
@@ -49,71 +90,31 @@ components:
             type: http
 info:
     contact:
-        email: long2ice@gmail.com
-        name: long2ice
+        email: kooksee@163.com
+        name: barry
         url: https://github.com/pubgo/opendoc
     description: this is description
     license:
         name: Apache License 2.0
-        url: https://github.com/pubgo/opendoc/blob/dev/LICENSE
-    termsOfService: https://github.com/long2ice
-    title: title-service
+        url: https://github.com/pubgo/opendoc/blob/master/LICENSE
+    termsOfService: https://github.com/pubgo
+    title: 'this service web title '
     version: v0.0.1-dev-99
 openapi: 3.0.0
 paths:
-    /api/v1/no_model:
-        post:
-            operationId: no_model_opt
-            parameters:
-                - in: header
-                  name: authorization
-                  required: true
-                  schema:
-                    default: authorization
-                    type: string
-                - in: header
-                  name: token
-                  required: true
-                  schema:
-                    default: token
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                required: true
-            responses:
-                "200":
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                    description: OK
-                default:
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                    description: OK
-            security:
-                - Basic: []
-                - Bearer: []
-            summary: Test no model
-            tags:
-                - test
-    /api/v1/v1/articles:
+    /api/v1/articles:
         get:
             operationId: article_list
             parameters:
-                - description: name of model
+                - description: name of model validate:required
                   in: query
                   name: name
                   required: true
                   schema:
                     default: test
                     type: string
-                - in: header
+                - description: required
+                  in: header
                   name: token
                   required: true
                   schema:
@@ -136,6 +137,7 @@ paths:
                                         nullable: true
                                         type: string
                                     optional:
+                                        allowEmptyValue: true
                                         nullable: true
                                         type: string
                                     req:
@@ -144,6 +146,16 @@ paths:
                                         default: test
                                         nullable: true
                                         type: string
+                                    types:
+                                        description: 类型
+                                        example:
+                                            - a
+                                            - b
+                                        items:
+                                            type: string
+                                        nullable: true
+                                        readOnly: true
+                                        type: array
                                 required:
                                     - name
                                     - token
@@ -162,6 +174,7 @@ paths:
                                         nullable: true
                                         type: string
                                     optional:
+                                        allowEmptyValue: true
                                         nullable: true
                                         type: string
                                     req:
@@ -170,6 +183,16 @@ paths:
                                         default: test
                                         nullable: true
                                         type: string
+                                    types:
+                                        description: 类型
+                                        example:
+                                            - a
+                                            - b
+                                        items:
+                                            type: string
+                                        nullable: true
+                                        readOnly: true
+                                        type: array
                                 required:
                                     - name
                                     - token
@@ -180,14 +203,13 @@ paths:
             security:
                 - Basic: []
                 - Bearer: []
-            summary: Test query list model
+            summary: get article list
             tags:
-                - test
-    /api/v1/v1/articles/{id}:
-        put:
-            operationId: article_update
+                - test article service
+        post:
+            operationId: article_create
             parameters:
-                - description: id of model
+                - description: id of model validate:required
                   in: path
                   name: id
                   required: true
@@ -212,13 +234,19 @@ paths:
                             properties:
                                 name:
                                     default: test
-                                    description: name of model
+                                    description: name of model validate:required
+                                    nullable: true
+                                    type: string
+                                name1:
+                                    default: test
+                                    description: name1 of model validate:required
                                     nullable: true
                                     type: string
                                 rsp:
                                     $ref: '#/components/schemas/TestQueryRsp.main'
                             required:
                                 - name
+                                - name1
                                 - rsp
                             type: object
                 required: true
@@ -234,6 +262,7 @@ paths:
                                         nullable: true
                                         type: string
                                     optional:
+                                        allowEmptyValue: true
                                         nullable: true
                                         type: string
                                     req:
@@ -242,6 +271,16 @@ paths:
                                         default: test
                                         nullable: true
                                         type: string
+                                    types:
+                                        description: 类型
+                                        example:
+                                            - a
+                                            - b
+                                        items:
+                                            type: string
+                                        nullable: true
+                                        readOnly: true
+                                        type: array
                                 required:
                                     - name
                                     - token
@@ -260,6 +299,7 @@ paths:
                                         nullable: true
                                         type: string
                                     optional:
+                                        allowEmptyValue: true
                                         nullable: true
                                         type: string
                                     req:
@@ -268,6 +308,16 @@ paths:
                                         default: test
                                         nullable: true
                                         type: string
+                                    types:
+                                        description: 类型
+                                        example:
+                                            - a
+                                            - b
+                                        items:
+                                            type: string
+                                        nullable: true
+                                        readOnly: true
+                                        type: array
                                 required:
                                     - name
                                     - token
@@ -278,6 +328,138 @@ paths:
             security:
                 - Basic: []
                 - Bearer: []
-            summary: Test query list model
+            summary: create article
             tags:
-                - test
+                - test article service
+    /api/v1/articles/{id}:
+        put:
+            operationId: article_update
+            parameters:
+                - description: id of model validate:required
+                  in: path
+                  name: id
+                  required: true
+                  schema:
+                    default: "1"
+                    type: integer
+                - in: header
+                  name: token
+                  required: true
+                  schema:
+                    default: test
+                    type: string
+                - in: query
+                  name: optional
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                name:
+                                    default: test
+                                    description: name of model validate:required
+                                    nullable: true
+                                    type: string
+                                name1:
+                                    default: test
+                                    description: name1 of model validate:required
+                                    nullable: true
+                                    type: string
+                                rsp:
+                                    $ref: '#/components/schemas/TestQueryRsp.main'
+                            required:
+                                - name
+                                - name1
+                                - rsp
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    name:
+                                        default: test
+                                        description: name of model
+                                        nullable: true
+                                        type: string
+                                    optional:
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: string
+                                    req:
+                                        $ref: '#/components/schemas/TestQueryReq.main'
+                                    token:
+                                        default: test
+                                        nullable: true
+                                        type: string
+                                    types:
+                                        description: 类型
+                                        example:
+                                            - a
+                                            - b
+                                        items:
+                                            type: string
+                                        nullable: true
+                                        readOnly: true
+                                        type: array
+                                required:
+                                    - name
+                                    - token
+                                    - optional
+                                    - req
+                                type: object
+                    description: OK
+                default:
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    name:
+                                        default: test
+                                        description: name of model
+                                        nullable: true
+                                        type: string
+                                    optional:
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: string
+                                    req:
+                                        $ref: '#/components/schemas/TestQueryReq.main'
+                                    token:
+                                        default: test
+                                        nullable: true
+                                        type: string
+                                    types:
+                                        description: 类型
+                                        example:
+                                            - a
+                                            - b
+                                        items:
+                                            type: string
+                                        nullable: true
+                                        readOnly: true
+                                        type: array
+                                required:
+                                    - name
+                                    - token
+                                    - optional
+                                    - req
+                                type: object
+                    description: OK
+                error:
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                    description: error
+            security:
+                - Basic: []
+                - Bearer: []
+            summary: update article
+            tags:
+                - test article service

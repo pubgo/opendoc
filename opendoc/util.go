@@ -232,7 +232,7 @@ func genRequestBody(model interface{}, contentType ...string) *openapi3.RequestB
 	return body
 }
 
-func genResponses(response interface{}, contentType ...string) openapi3.Responses {
+func genResponses(response interface{}, contentType ...string) *openapi3.Responses {
 	if len(contentType) == 0 {
 		contentType = []string{"application/json"}
 	}
@@ -248,8 +248,8 @@ func genResponses(response interface{}, contentType ...string) openapi3.Response
 	}
 
 	ret := openapi3.NewResponses()
-	ret["200"] = rsp
-	ret["default"] = rsp
+	ret.Set("200", rsp)
+	ret.Set("default", rsp)
 	return ret
 }
 

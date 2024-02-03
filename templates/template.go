@@ -4,8 +4,8 @@ import (
 	_ "embed"
 	"fmt"
 	"html/template"
+	"net/http"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/pubgo/funk/assert"
 )
 
@@ -18,10 +18,10 @@ var swaggerFile string
 var reDocTemplate = assert.Exit1(template.New("").Parse(reDocFile))
 var swaggerTemplate = assert.Exit1(template.New("").Parse(swaggerFile))
 
-func RapiDocHandler(title, url string) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		ctx.Response().Header.Set("Content-Type", "text/html")
-		ctx.Write([]byte(fmt.Sprintf(`<!doctype html>
+func RapiDocHandler(title, url string) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/html")
+		writer.Write([]byte(fmt.Sprintf(`<!doctype html>
 <html>
 <head>
 	<title>%s</title>
@@ -38,28 +38,27 @@ func RapiDocHandler(title, url string) fiber.Handler {
   > </rapi-doc>
 </body>
 </html>`, title, url)))
-		return nil
 	}
 }
 
-func ReDocHandler(title, url string) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		ctx.Response().Header.Set("Content-Type", "text/html")
-		return reDocTemplate.Execute(ctx, map[string]string{
+func ReDocHandler(title, url string) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/html")
+		assert.Must(reDocTemplate.Execute(writer, map[string]string{
 			"title":           title,
 			"openapi_url":     url,
 			"openapi_options": `{}`,
-		})
+		}))
 	}
 }
 
-func SwaggerHandler(title, url string) fiber.Handler {
-	return func(ctx *fiber.Ctx) error {
-		ctx.Response().Header.Set("Content-Type", "text/html")
-		return swaggerTemplate.Execute(ctx, map[string]string{
+func SwaggerHandler(title, url string) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/html")
+		assert.Must(swaggerTemplate.Execute(writer, map[string]string{
 			"title":           title,
 			"openapi_url":     url,
 			"openapi_options": `{}`,
-		})
+		}))
 	}
 }

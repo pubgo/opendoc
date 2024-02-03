@@ -2,10 +2,10 @@ package opendoc
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/gofiber/fiber/v2"
 	"github.com/invopop/yaml"
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/funk/version"
@@ -64,31 +64,31 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 		},
 	}
 
-	var routes = make(map[string]*openapi3.PathItem)
+	var opts []openapi3.NewPathsOption
 	for i := range s.Routers {
 		for k, v := range s.Routers[i].Openapi() {
 			if v == nil {
 				continue
 			}
-			routes[k] = v
+
+			opts = append(opts, openapi3.WithPath(k, v))
 		}
 	}
-	t.Paths = routes
+	t.Paths = openapi3.NewPaths(opts...)
 
 	return t
 }
 
-func (s *Swagger) InitRouter(r fiber.Router) {
-	r.Get(s.Config.OpenapiRouter, templates.SwaggerHandler(s.Config.Title, s.Config.OpenapiUrl))
-	r.Get(s.Config.OpenapiRedocRouter, templates.ReDocHandler(s.Config.Title, s.Config.OpenapiUrl))
-	r.Get(s.Config.OpenapiUrl, s.OpenapiDataHandler())
+func (s *Swagger) InitRouter(r *http.ServeMux) {
+	r.Handle(s.Config.OpenapiRouter, templates.SwaggerHandler(s.Config.Title, s.Config.OpenapiUrl))
+	r.Handle(s.Config.OpenapiRedocRouter, templates.ReDocHandler(s.Config.Title, s.Config.OpenapiUrl))
+	r.Handle(s.Config.OpenapiUrl, s.OpenapiDataHandler())
 }
 
-func (s *Swagger) OpenapiDataHandler() fiber.Handler {
+func (s *Swagger) OpenapiDataHandler() http.HandlerFunc {
 	var bytes = assert.Must1(s.MarshalYAML())
-	return func(ctx *fiber.Ctx) error {
-		var _, err = ctx.Write(bytes)
-		return err
+	return func(writer http.ResponseWriter, request *http.Request) {
+		assert.Must1(writer.Write(bytes))
 	}
 }
 
