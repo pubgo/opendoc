@@ -2,7 +2,6 @@ package opendoc
 
 import (
 	"fmt"
-	"github.com/pubgo/funk/log"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -15,6 +14,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/goccy/go-json"
 	"github.com/pubgo/funk/assert"
+	"github.com/pubgo/funk/log"
 	"github.com/pubgo/opendoc/security"
 	"k8s.io/kube-openapi/pkg/util"
 )
@@ -38,7 +38,7 @@ func checkModelType(model interface{}) {
 		t = t.Elem()
 	}
 
-	assert.If(t.Kind() != reflect.Struct, "The native type of val should be struct")
+	assert.If(t.Kind() != reflect.Struct, "The native type of model should be struct")
 }
 
 func getSchemaName(val interface{}) string {
@@ -70,7 +70,7 @@ func getCanonicalTypeName(val interface{}) string {
 		path = path[strings.Index(path, "/vendor/")+len("/vendor/"):]
 	}
 
-	path = strings.TrimPrefix(path, "vendor/")
+	path = strings.Trim(strings.TrimPrefix(path, "vendor"), "/")
 	return path + "." + model.Name()
 }
 
@@ -198,8 +198,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			getTag(tags, deprecated, func(tag *structtag.Tag) { fieldSchema.Deprecated = true })
 			getTag(tags, defaultName, func(tag *structtag.Tag) { fieldSchema.Default = tag.Name })
 			getTag(tags, example, func(tag *structtag.Tag) {
-				err = json.Unmarshal([]byte(tag.Value()), &fieldSchema.Example)
-				if err != nil {
+				if err := json.Unmarshal([]byte(tag.Value()), &fieldSchema.Example); err != nil {
 					log.Err(err).Str("tag-value", tag.Value()).Msg("failed to unmarshal example")
 				}
 			})

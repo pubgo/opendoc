@@ -9,3 +9,4 @@ package templates
 // https://github.com/long2ice/swagin
 // https://github.com/long2ice/fibers
 // https://github.com/getkin/kin-openapi
+// https://github.com/danielgtaylor/huma

@@ -1,11 +1,12 @@
 package main
 
 import (
+	"os"
+
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/funk/recovery"
 	"github.com/pubgo/opendoc/opendoc"
 	"github.com/pubgo/opendoc/security"
-	"os"
 )
 
 type TestQueryReqAAA struct {
