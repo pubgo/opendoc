@@ -129,6 +129,21 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 		}
 
 		return "", &openapi3.Schema{OneOf: refs}
+	case AnyOfExposer:
+		var refs []*openapi3.SchemaRef
+		for _, s := range v.JSONSchemaAnyOf() {
+			ref, schema := genSchema(s)
+			if ref != "" {
+				refs = append(refs, openapi3.NewSchemaRef(ref, nil))
+			} else {
+				refs = append(refs, &openapi3.SchemaRef{Value: schema})
+			}
+		}
+
+		return "", &openapi3.Schema{AnyOf: refs}
+
+	case Enum:
+		return "", &openapi3.Schema{Enum: v.Enum()}
 	}
 
 	switch model.Kind() {
@@ -161,11 +176,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 
 		for i := 0; i < model.NumField(); i++ {
 			field := model.Field(i)
-			tags, err := structtag.Parse(string(field.Tag))
-			if err != nil {
-				panic(err)
-			}
-
+			tags := assert.Must1(structtag.Parse(string(field.Tag)))
 			if isParameter(tags) {
 				continue
 			}
@@ -342,4 +353,48 @@ func genParameters(val interface{}) openapi3.Parameters {
 		parameters = append(parameters, &openapi3.ParameterRef{Value: parameter})
 	}
 	return parameters
+}
+
+// unescape unescapes an extended JSON pointer
+func unescape(s string) string {
+	s = strings.ReplaceAll(s, "~2", "*")
+	s = strings.ReplaceAll(s, "~1", "/")
+	return strings.ReplaceAll(s, "~0", "~")
+}
+
+// espaceSJSONPath escapes a sjson path
+func espaceSJSONPath(s string) string {
+	// https://github.com/tidwall/sjson/blob/master/sjson.go#L47
+	s = strings.ReplaceAll(s, "|", "\\|")
+	s = strings.ReplaceAll(s, "#", "\\#")
+	s = strings.ReplaceAll(s, "@", "\\@")
+	s = strings.ReplaceAll(s, "*", "\\*")
+
+	return strings.ReplaceAll(s, "?", "\\?")
+}
+
+// Specific JSON pointer encoding here
+// ~0 => ~
+// ~1 => /
+// ... and vice versa
+
+const (
+	encRefTok0 = `~0`
+	encRefTok1 = `~1`
+	decRefTok0 = `~`
+	decRefTok1 = `/`
+)
+
+// Unescape unescapes a json pointer reference token string to the original representation
+func Unescape(token string) string {
+	step1 := strings.ReplaceAll(token, encRefTok1, decRefTok1)
+	step2 := strings.ReplaceAll(step1, encRefTok0, decRefTok0)
+	return step2
+}
+
+// Escape escapes a pointer reference token string
+func Escape(token string) string {
+	step1 := strings.ReplaceAll(token, decRefTok0, encRefTok0)
+	step2 := strings.ReplaceAll(step1, decRefTok1, encRefTok1)
+	return step2
 }
