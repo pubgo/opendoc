@@ -2,6 +2,8 @@ package opendoc
 
 import "github.com/pubgo/funk/version"
 
+// https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
+
 type Config struct {
 	Title              string                 `yaml:"title"`
 	OpenapiRouter      string                 `yaml:"path"`
