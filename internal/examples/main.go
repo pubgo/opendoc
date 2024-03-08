@@ -1,12 +1,11 @@
 package main
 
 import (
-	"os"
-
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/funk/recovery"
 	"github.com/pubgo/opendoc/opendoc"
 	"github.com/pubgo/opendoc/security"
+	"net/http"
 )
 
 type TestQueryReqAAA struct {
@@ -64,10 +63,10 @@ func main() {
 		})
 	})
 
-	data := assert.Must1(doc.MarshalYAML())
-	assert.Exit(os.WriteFile("openapi.yaml", data, 0644))
+	//data := assert.Must1(doc.MarshalYAML())
+	//assert.Exit(os.WriteFile("openapi.yaml", data, 0644))
 
-	//var app = fiber.New()
-	//doc.InitRouter(app)
-	//assert.Exit(app.Listen("localhost:8080"))
+	var app = http.NewServeMux()
+	doc.InitRouter(app)
+	assert.Exit(http.ListenAndServe("localhost:8080", app))
 }

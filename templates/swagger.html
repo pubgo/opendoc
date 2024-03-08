@@ -3,22 +3,24 @@
 <head>
     <meta charset="utf-8">
     <title>{{ .title }} - Swagger UI</title>
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@3/swagger-ui.css">
-    <script src="https://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js" charset="UTF-8"></script>
+    <link rel="stylesheet" type="text/css" href="//unpkg.com/swagger-ui-dist@3.25.0/swagger-ui.css">
+    <link rel="icon" type="image/png" href="//unpkg.com/swagger-ui-dist@3.25.0/favicon-16x16.png"/>
+    <script src="//unpkg.com/swagger-ui-dist@3.25.0/swagger-ui-bundle.js"></script>
 </head>
 <body>
 <div id="openapi"></div>
 <script>
-    let options = JSON.parse('{{ .openapi_options }}')
-    SwaggerUIBundle({
-        url: "{{ .openapi_url }}",
-        dom_id: '#openapi',
-        presets: [
-            SwaggerUIBundle.presets.apis,
-        ],
-        persistAuthorization: true,
-        ...options
-    })
+    window.onload = function () {
+        let options = JSON.parse('{{ .openapi_options }}')
+        window.ui = SwaggerUIBundle({
+            deepLinking: true,
+            layout: "BaseLayout",
+            url: "{{ .openapi_url }}",
+            dom_id: '#openapi',
+            persistAuthorization: true,
+            ...options
+        });
+    }
 </script>
 </body>
 </html>
