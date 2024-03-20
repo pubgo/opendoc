@@ -82,6 +82,7 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 func (s *Swagger) InitRouter(r *http.ServeMux) {
 	r.Handle(s.Config.OpenapiRouter, templates.SwaggerHandler(s.Config.Title, s.Config.OpenapiUrl))
 	r.Handle(s.Config.OpenapiRedocRouter, templates.ReDocHandler(s.Config.Title, s.Config.OpenapiUrl))
+	r.Handle(s.Config.OpenapiRApiDocRouter, templates.RApiDocHandler(s.Config.OpenapiUrl))
 	r.Handle(s.Config.OpenapiUrl, s.OpenapiDataHandler())
 }
 

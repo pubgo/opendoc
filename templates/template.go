@@ -14,8 +14,22 @@ var reDocFile string
 //go:embed swagger.html
 var swaggerFile string
 
+//go:embed rapidoc.html
+var rApiDocFile string
+
 var reDocTemplate = assert.Exit1(template.New("").Parse(reDocFile))
 var swaggerTemplate = assert.Exit1(template.New("").Parse(swaggerFile))
+var rApiDocFileTemplate = assert.Exit1(template.New("").Parse(rApiDocFile))
+
+func RApiDocHandler(url string) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "text/html")
+		assert.Must(rApiDocFileTemplate.Execute(writer, map[string]string{
+			"openapi_url":     url,
+			"openapi_options": `{}`,
+		}))
+	}
+}
 
 func ReDocHandler(title, url string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
