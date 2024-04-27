@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/funk/recovery"
 	"github.com/pubgo/opendoc/opendoc"
 	"github.com/pubgo/opendoc/security"
-	"os"
 )
 
 type TestQueryReqAAA struct {
@@ -19,7 +21,7 @@ type TestQueryReqAAA struct {
 func main() {
 	defer recovery.Exit()
 
-	var doc = opendoc.New(func(swag *opendoc.Swagger) {
+	doc := opendoc.New(func(swag *opendoc.Swagger) {
 		swag.Config.Title = "this service web title "
 		swag.Description = "this is description"
 		swag.License = &opendoc.License{
@@ -63,10 +65,11 @@ func main() {
 		})
 	})
 
-	data := assert.Must1(doc.MarshalYAML())
-	assert.Exit(os.WriteFile("openapi.yaml", data, 0644))
+	// data := assert.Must1(doc.MarshalYAML())
+	// assert.Exit(os.WriteFile("openapi.yaml", data, 0644))
 
-	//var app = fiber.New()
-	//doc.InitRouter(app)
-	//assert.Exit(app.Listen("localhost:8080"))
+	app := http.NewServeMux()
+	doc.InitRouter(app)
+	fmt.Println("http://localhost:8080/debug/apidocs")
+	assert.Exit(http.ListenAndServe("localhost:8080", app))
 }

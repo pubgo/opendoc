@@ -4,8 +4,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-type Basic struct {
-}
+type Basic struct{}
 
 type User struct {
 	Username string

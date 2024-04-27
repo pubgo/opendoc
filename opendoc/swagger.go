@@ -32,14 +32,14 @@ func (s *Swagger) SetRootPath(path string) {
 }
 
 func (s *Swagger) ServiceOf(name string, cb func(srv *Service)) {
-	var srv = newService(name)
+	srv := newService(name)
 	srv.prefix = s.rootPath
 	s.Routers = append(s.Routers, srv)
 	cb(srv)
 }
 
 func (s *Swagger) WithService() *Service {
-	var srv = new(Service)
+	srv := new(Service)
 	srv.prefix = s.rootPath
 	s.Routers = append(s.Routers, srv)
 	return srv
@@ -50,7 +50,7 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 		s.Config = DefaultCfg()
 	}
 
-	var t = &openapi3.T{
+	t := &openapi3.T{
 		OpenAPI:    "3.0.0",
 		Servers:    s.Servers,
 		Components: &components,
@@ -82,11 +82,12 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 func (s *Swagger) InitRouter(r *http.ServeMux) {
 	r.Handle(s.Config.OpenapiRouter, templates.SwaggerHandler(s.Config.Title, s.Config.OpenapiUrl))
 	r.Handle(s.Config.OpenapiRedocRouter, templates.ReDocHandler(s.Config.Title, s.Config.OpenapiUrl))
+	r.Handle(s.Config.OpenapiRApiDocRouter, templates.RApiDocHandler(s.Config.OpenapiUrl))
 	r.Handle(s.Config.OpenapiUrl, s.OpenapiDataHandler())
 }
 
 func (s *Swagger) OpenapiDataHandler() http.HandlerFunc {
-	var bytes = assert.Must1(s.MarshalYAML())
+	bytes := assert.Must1(s.MarshalYAML())
 	return func(writer http.ResponseWriter, request *http.Request) {
 		assert.Must1(writer.Write(bytes))
 	}

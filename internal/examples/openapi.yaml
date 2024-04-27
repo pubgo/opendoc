@@ -163,6 +163,26 @@ paths:
                                     - req
                                 type: object
                     description: OK
+                Test:
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    name:
+                                        default: test
+                                        description: name of model validate:required
+                                        nullable: true
+                                        type: string
+                                    name1:
+                                        default: test
+                                        description: name1 of model validate:required
+                                        nullable: true
+                                        type: string
+                                required:
+                                    - name
+                                    - name1
+                                type: object
+                    description: Test
                 default:
                     content:
                         application/json:

@@ -2,7 +2,6 @@ package opendoc
 
 import (
 	"fmt"
-	"github.com/pubgo/funk/log"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -15,12 +14,13 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/goccy/go-json"
 	"github.com/pubgo/funk/assert"
+	"github.com/pubgo/funk/log"
 	"github.com/pubgo/opendoc/security"
 	"k8s.io/kube-openapi/pkg/util"
 )
 
 func getTag(tags *structtag.Tags, key string, fn func(tag *structtag.Tag)) {
-	var tag, err = tags.Get(key)
+	tag, err := tags.Get(key)
 	if err == nil && tag.Key != "" {
 		fn(tag)
 	}
@@ -38,7 +38,7 @@ func checkModelType(model interface{}) {
 		t = t.Elem()
 	}
 
-	assert.If(t.Kind() != reflect.Struct, "The native type of val should be struct")
+	assert.If(t.Kind() != reflect.Struct, "The native type of model should be struct")
 }
 
 func getSchemaName(val interface{}) string {
@@ -70,7 +70,7 @@ func getCanonicalTypeName(val interface{}) string {
 		path = path[strings.Index(path, "/vendor/")+len("/vendor/"):]
 	}
 
-	path = strings.TrimPrefix(path, "vendor/")
+	path = strings.Trim(strings.TrimPrefix(path, "vendor"), "/")
 	return path + "." + model.Name()
 }
 
@@ -129,6 +129,21 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 		}
 
 		return "", &openapi3.Schema{OneOf: refs}
+	case AnyOfExposer:
+		var refs []*openapi3.SchemaRef
+		for _, s := range v.JSONSchemaAnyOf() {
+			ref, schema := genSchema(s)
+			if ref != "" {
+				refs = append(refs, openapi3.NewSchemaRef(ref, nil))
+			} else {
+				refs = append(refs, &openapi3.SchemaRef{Value: schema})
+			}
+		}
+
+		return "", &openapi3.Schema{AnyOf: refs}
+
+	case Enum:
+		return "", &openapi3.Schema{Enum: v.Enum()}
 	}
 
 	switch model.Kind() {
@@ -161,11 +176,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 
 		for i := 0; i < model.NumField(); i++ {
 			field := model.Field(i)
-			tags, err := structtag.Parse(string(field.Tag))
-			if err != nil {
-				panic(err)
-			}
-
+			tags := assert.Must1(structtag.Parse(string(field.Tag)))
 			if isParameter(tags) {
 				continue
 			}
@@ -198,8 +209,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			getTag(tags, deprecated, func(tag *structtag.Tag) { fieldSchema.Deprecated = true })
 			getTag(tags, defaultName, func(tag *structtag.Tag) { fieldSchema.Default = tag.Name })
 			getTag(tags, example, func(tag *structtag.Tag) {
-				err = json.Unmarshal([]byte(tag.Value()), &fieldSchema.Example)
-				if err != nil {
+				if err := json.Unmarshal([]byte(tag.Value()), &fieldSchema.Example); err != nil {
 					log.Err(err).Str("tag-value", tag.Value()).Msg("failed to unmarshal example")
 				}
 			})
@@ -239,8 +249,8 @@ func genResponses(response interface{}, contentType ...string) *openapi3.Respons
 
 	_, schema := genSchema(response)
 	content := openapi3.NewContentWithSchema(schema, contentType)
-	var docText = http.StatusText(http.StatusOK)
-	var rsp = &openapi3.ResponseRef{
+	docText := http.StatusText(http.StatusOK)
+	rsp := &openapi3.ResponseRef{
 		Value: &openapi3.Response{
 			Description: &docText,
 			Content:     content,
@@ -254,7 +264,7 @@ func genResponses(response interface{}, contentType ...string) *openapi3.Respons
 }
 
 func isParameter(val *structtag.Tags) bool {
-	var params = []string{queryTag, uriTag, pathTag, headerTag, cookieTag}
+	params := []string{queryTag, uriTag, pathTag, headerTag, cookieTag}
 	for i := range params {
 		if _, err := val.Get(params[i]); err == nil {
 			return true
@@ -343,4 +353,48 @@ func genParameters(val interface{}) openapi3.Parameters {
 		parameters = append(parameters, &openapi3.ParameterRef{Value: parameter})
 	}
 	return parameters
+}
+
+// unescape unescapes an extended JSON pointer
+func unescape(s string) string {
+	s = strings.ReplaceAll(s, "~2", "*")
+	s = strings.ReplaceAll(s, "~1", "/")
+	return strings.ReplaceAll(s, "~0", "~")
+}
+
+// espaceSJSONPath escapes a sjson path
+func espaceSJSONPath(s string) string {
+	// https://github.com/tidwall/sjson/blob/master/sjson.go#L47
+	s = strings.ReplaceAll(s, "|", "\\|")
+	s = strings.ReplaceAll(s, "#", "\\#")
+	s = strings.ReplaceAll(s, "@", "\\@")
+	s = strings.ReplaceAll(s, "*", "\\*")
+
+	return strings.ReplaceAll(s, "?", "\\?")
+}
+
+// Specific JSON pointer encoding here
+// ~0 => ~
+// ~1 => /
+// ... and vice versa
+
+const (
+	encRefTok0 = `~0`
+	encRefTok1 = `~1`
+	decRefTok0 = `~`
+	decRefTok1 = `/`
+)
+
+// Unescape unescapes a json pointer reference token string to the original representation
+func Unescape(token string) string {
+	step1 := strings.ReplaceAll(token, encRefTok1, decRefTok1)
+	step2 := strings.ReplaceAll(step1, encRefTok0, decRefTok0)
+	return step2
+}
+
+// Escape escapes a pointer reference token string
+func Escape(token string) string {
+	step1 := strings.ReplaceAll(token, decRefTok0, encRefTok0)
+	step2 := strings.ReplaceAll(step1, decRefTok1, encRefTok1)
+	return step2
 }

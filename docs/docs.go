@@ -9,3 +9,7 @@ package templates
 // https://github.com/long2ice/swagin
 // https://github.com/long2ice/fibers
 // https://github.com/getkin/kin-openapi
+// https://github.com/danielgtaylor/huma
+// https://github.com/swaggest/jsonschema-go
+// https://github.com/swaggest/openapi-go
+// https://github.com/santhosh-tekuri/jsonschema

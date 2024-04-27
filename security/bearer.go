@@ -4,8 +4,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-type Bearer struct {
-}
+type Bearer struct{}
 
 func (b Bearer) Provider() string {
 	return "Bearer"
