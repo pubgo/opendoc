@@ -17,9 +17,11 @@ var swaggerFile string
 //go:embed rapidoc.html
 var rApiDocFile string
 
-var reDocTemplate = assert.Exit1(template.New("").Parse(reDocFile))
-var swaggerTemplate = assert.Exit1(template.New("").Parse(swaggerFile))
-var rApiDocFileTemplate = assert.Exit1(template.New("").Parse(rApiDocFile))
+var (
+	reDocTemplate       = assert.Exit1(template.New("").Parse(reDocFile))
+	swaggerTemplate     = assert.Exit1(template.New("").Parse(swaggerFile))
+	rApiDocFileTemplate = assert.Exit1(template.New("").Parse(rApiDocFile))
+)
 
 func RApiDocHandler(url string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {

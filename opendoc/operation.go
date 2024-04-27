@@ -87,7 +87,7 @@ func (op *Operation) SetOperation(operationID string) *Operation {
 	return op
 }
 
-func (op *Operation) SetModel(req interface{}, rsp interface{}) *Operation {
+func (op *Operation) SetModel(req, rsp interface{}) *Operation {
 	checkModelType(req)
 	op.request = req
 

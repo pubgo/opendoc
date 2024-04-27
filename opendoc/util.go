@@ -20,7 +20,7 @@ import (
 )
 
 func getTag(tags *structtag.Tags, key string, fn func(tag *structtag.Tag)) {
-	var tag, err = tags.Get(key)
+	tag, err := tags.Get(key)
 	if err == nil && tag.Key != "" {
 		fn(tag)
 	}
@@ -249,8 +249,8 @@ func genResponses(response interface{}, contentType ...string) *openapi3.Respons
 
 	_, schema := genSchema(response)
 	content := openapi3.NewContentWithSchema(schema, contentType)
-	var docText = http.StatusText(http.StatusOK)
-	var rsp = &openapi3.ResponseRef{
+	docText := http.StatusText(http.StatusOK)
+	rsp := &openapi3.ResponseRef{
 		Value: &openapi3.Response{
 			Description: &docText,
 			Content:     content,
@@ -264,7 +264,7 @@ func genResponses(response interface{}, contentType ...string) *openapi3.Respons
 }
 
 func isParameter(val *structtag.Tags) bool {
-	var params = []string{queryTag, uriTag, pathTag, headerTag, cookieTag}
+	params := []string{queryTag, uriTag, pathTag, headerTag, cookieTag}
 	for i := range params {
 		if _, err := val.Get(params[i]); err == nil {
 			return true

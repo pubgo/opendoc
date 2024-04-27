@@ -4,10 +4,12 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-type License = openapi3.License
-type Contact = openapi3.Contact
-type Servers = openapi3.Servers
-type Server = openapi3.Server
+type (
+	License = openapi3.License
+	Contact = openapi3.Contact
+	Servers = openapi3.Servers
+	Server  = openapi3.Server
+)
 
 // NamedEnum returns the enumerated acceptable values with according string names.
 type NamedEnum interface {

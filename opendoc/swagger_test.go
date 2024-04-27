@@ -34,18 +34,18 @@ type testQueryReq struct {
 }
 
 func TestGenSchema(t *testing.T) {
-	var ref, s = genSchema(testQueryReq{})
+	ref, s := genSchema(testQueryReq{})
 	assert.NotNil(t, s)
 	assert.Equal(t, "#/components/schemas/com.github.pubgo.opendoc.testQueryReq", ref)
 
-	var data, err = json.Marshal(s)
+	data, err := json.Marshal(s)
 	assert.NoError(t, err)
 	assert.Equal(t,
 		`{"properties":{"name":{"default":"test","description":"name of model","nullable":true,"type":"string"},"rsp":{"$ref":"#/components/schemas/com.github.pubgo.opendoc.testQueryRsp"}},"required":["name","rsp"],"type":"object"}`,
 		string(data),
 	)
 
-	var p = genParameters(testQueryReq{})
+	p := genParameters(testQueryReq{})
 	data, err = json.Marshal(p)
 	assert.NoError(t, err)
 	assert.Equal(t,

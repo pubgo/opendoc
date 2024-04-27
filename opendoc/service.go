@@ -97,7 +97,7 @@ func (s *Service) PostOf(cb func(op *Operation)) *Service {
 }
 
 func (s *Service) Openapi() map[string]*openapi3.PathItem {
-	var routes = make(map[string]*openapi3.PathItem)
+	routes := make(map[string]*openapi3.PathItem)
 	for i := range s.operations {
 		op := s.operations[i]
 		if routes[op.path] == nil {
