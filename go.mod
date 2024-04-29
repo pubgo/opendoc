@@ -4,12 +4,11 @@ go 1.20
 
 require (
 	github.com/fatih/structtag v1.2.0
-	github.com/getkin/kin-openapi v0.123.0
-	github.com/goccy/go-json v0.10.0
-	github.com/invopop/yaml v0.2.0
+	github.com/getkin/kin-openapi v0.124.0
+	github.com/goccy/go-json v0.10.2
+	github.com/invopop/yaml v0.3.1
 	github.com/pubgo/funk v0.5.41
-	github.com/stretchr/testify v1.8.4
-	k8s.io/kube-openapi v0.0.0-20221123214604-86e75ddd809a
+	github.com/stretchr/testify v1.9.0
 )
 
 require (

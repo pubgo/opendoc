@@ -6,17 +6,16 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/kube-openapi/pkg/util"
 )
 
 func TestRefName(t *testing.T) {
 	assert.Equal(t,
 		"com.github.getkin.kin-openapi.openapi3.License",
-		util.ToRESTFriendlyName(util.GetCanonicalTypeName(new(openapi3.License))))
+		ToRESTFriendlyName(GetCanonicalTypeName(new(openapi3.License))))
 
 	assert.Equal(t,
 		"github.com/getkin/kin-openapi/openapi3.License",
-		util.GetCanonicalTypeName(new(openapi3.License)))
+		GetCanonicalTypeName(new(openapi3.License)))
 }
 
 type testQueryRsp struct {
