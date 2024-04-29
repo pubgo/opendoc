@@ -16,7 +16,6 @@ import (
 	"github.com/pubgo/funk/assert"
 	"github.com/pubgo/funk/log"
 	"github.com/pubgo/opendoc/security"
-	"k8s.io/kube-openapi/pkg/util"
 )
 
 func getTag(tags *structtag.Tags, key string, fn func(tag *structtag.Tag)) {
@@ -42,14 +41,14 @@ func checkModelType(model interface{}) {
 }
 
 func getSchemaName(val interface{}) string {
-	return util.ToRESTFriendlyName(getCanonicalTypeName(val))
+	return ToRESTFriendlyName(GetCanonicalTypeName(val))
 }
 
 func getComponentName(name string) string {
 	return fmt.Sprintf("#/components/schemas/%s", name)
 }
 
-func getCanonicalTypeName(val interface{}) string {
+func GetCanonicalTypeName(val interface{}) string {
 	var model reflect.Type
 	if typ, ok := val.(reflect.Type); ok {
 		model = typ
@@ -101,19 +100,19 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 	case reflect.TypeOf([]byte{}):
 		return "", openapi3.NewBytesSchema()
 	case reflect.TypeOf(multipart.FileHeader{}):
-		return "", &openapi3.Schema{Type: openapi3.TypeString, Format: "binary"}
+		return "", &openapi3.Schema{Type: &openapi3.Types{openapi3.TypeString}, Format: "binary"}
 	case reflect.TypeOf([]*multipart.FileHeader{}):
 		schema = openapi3.NewArraySchema()
-		schema.Items = openapi3.NewSchemaRef("", &openapi3.Schema{Type: openapi3.TypeString, Format: "binary"})
+		schema.Items = openapi3.NewSchemaRef("", &openapi3.Schema{Type: &openapi3.Types{openapi3.TypeString}, Format: "binary"})
 		return "", schema
 	case reflect.TypeOf(time.Time{}):
 		return "", openapi3.NewDateTimeSchema()
 	case reflect.TypeOf(time.Duration(0)):
-		return "", &openapi3.Schema{Type: openapi3.TypeString, Format: "duration"}
+		return "", &openapi3.Schema{Type: &openapi3.Types{openapi3.TypeString}, Format: "duration"}
 	case reflect.TypeOf(net.IP{}):
-		return "", &openapi3.Schema{Type: openapi3.TypeString, Format: "ipv4"}
+		return "", &openapi3.Schema{Type: &openapi3.Types{openapi3.TypeString}, Format: "ipv4"}
 	case reflect.TypeOf(url.URL{}):
-		return "", &openapi3.Schema{Type: openapi3.TypeString, Format: "uri"}
+		return "", &openapi3.Schema{Type: &openapi3.Types{openapi3.TypeString}, Format: "uri"}
 	}
 
 	switch v := val.(type) {
@@ -397,4 +396,31 @@ func Escape(token string) string {
 	step1 := strings.ReplaceAll(token, decRefTok0, encRefTok0)
 	step2 := strings.ReplaceAll(step1, decRefTok1, encRefTok1)
 	return step2
+}
+
+// ToRESTFriendlyName converts Golang package/type canonical name into REST friendly OpenAPI name.
+//
+// Examples of REST friendly OpenAPI name:
+//
+//	Input:  k8s.io/api/core/v1.Pod
+//	Output: io.k8s.api.core.v1.Pod
+//
+//	Input:  k8s.io/api/core/v1
+//	Output: io.k8s.api.core.v1
+//
+//	Input:  csi.storage.k8s.io/v1alpha1.CSINodeInfo
+//	Output: io.k8s.storage.csi.v1alpha1.CSINodeInfo
+//
+// Copy from k8s.io/kube-openapi
+func ToRESTFriendlyName(name string) string {
+	nameParts := strings.Split(name, "/")
+	// Reverse first part. e.g., io.k8s... instead of k8s.io...
+	if len(nameParts) > 0 && strings.Contains(nameParts[0], ".") {
+		parts := strings.Split(nameParts[0], ".")
+		for i, j := 0, len(parts)-1; i < j; i, j = i+1, j-1 {
+			parts[i], parts[j] = parts[j], parts[i]
+		}
+		nameParts[0] = strings.Join(parts, ".")
+	}
+	return strings.Join(nameParts, ".")
 }
