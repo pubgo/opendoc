@@ -5,12 +5,11 @@ import (
 )
 
 type ApiKey struct {
+	// Name of the header to be used.
 	Name string
 }
 
-func (k ApiKey) Provider() string {
-	return "ApiKey"
-}
+func (k ApiKey) Provider() AuthProviderType { return AuthProviderTypeApiKey }
 
 func (k ApiKey) Scheme() *openapi3.SecurityScheme {
 	return &openapi3.SecurityScheme{

@@ -1,10 +1,10 @@
 package opendoc
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/goccy/go-json"
 	"github.com/stretchr/testify/assert"
 )
 

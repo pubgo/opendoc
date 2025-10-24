@@ -1,12 +1,9 @@
-package opendoc
-
-import "github.com/pubgo/funk/version"
+package templates
 
 // https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
 // https://rapidocweb.com/api.html#att-general
 
 type Config struct {
-	Title                string                 `yaml:"title"`
 	OpenapiRouter        string                 `yaml:"path"`
 	OpenapiRedocRouter   string                 `yaml:"redoc-path"`
 	OpenapiRApiDocRouter string                 `yaml:"rapidoc-path"`
@@ -14,9 +11,8 @@ type Config struct {
 	OpenapiOpt           map[string]interface{} `yaml:"options"`
 }
 
-func DefaultCfg() *Config {
-	return &Config{
-		Title:                version.Project() + " openapi docs",
+func DefaultCfg() Config {
+	return Config{
 		OpenapiRouter:        "/debug/docs",
 		OpenapiRedocRouter:   "/debug/redocs",
 		OpenapiRApiDocRouter: "/debug/apidocs",

@@ -1,22 +1,16 @@
 package opendoc
 
 import (
-	"fmt"
-	"net/http"
+	"log"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/invopop/yaml"
-	"github.com/pubgo/funk/assert"
-	"github.com/pubgo/funk/version"
-
-	"github.com/pubgo/opendoc/templates"
 )
 
 type Swagger struct {
-	rootPath string
-
-	Config         *Config
+	rootPath       string
+	Title          string
 	Description    string
 	Version        string
 	TermsOfService string
@@ -27,7 +21,10 @@ type Swagger struct {
 }
 
 func (s *Swagger) SetRootPath(path string) {
-	assert.If(path == "", "path should not be null")
+	if path == "" {
+		log.Panic("path should not be null")
+	}
+
 	s.rootPath = "/" + strings.Trim(strings.TrimSpace(path), "/")
 }
 
@@ -46,16 +43,11 @@ func (s *Swagger) WithService() *Service {
 }
 
 func (s *Swagger) buildSwagger() *openapi3.T {
-	if s.Config == nil {
-		s.Config = DefaultCfg()
-	}
-
 	t := &openapi3.T{
 		OpenAPI:    "3.0.0",
 		Servers:    s.Servers,
 		Components: &components,
 		Info: &openapi3.Info{
-			Title:          s.Config.Title,
 			Description:    s.Description,
 			TermsOfService: s.TermsOfService,
 			Contact:        s.Contact,
@@ -79,20 +71,6 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 	return t
 }
 
-func (s *Swagger) InitRouter(r *http.ServeMux) {
-	r.Handle(s.Config.OpenapiRouter, templates.SwaggerHandler(s.Config.Title, s.Config.OpenapiUrl))
-	r.Handle(s.Config.OpenapiRedocRouter, templates.ReDocHandler(s.Config.Title, s.Config.OpenapiUrl))
-	r.Handle(s.Config.OpenapiRApiDocRouter, templates.RApiDocHandler(s.Config.OpenapiUrl))
-	r.Handle(s.Config.OpenapiUrl, s.OpenapiDataHandler())
-}
-
-func (s *Swagger) OpenapiDataHandler() http.HandlerFunc {
-	bytes := assert.Must1(s.MarshalYAML())
-	return func(writer http.ResponseWriter, request *http.Request) {
-		assert.Must1(writer.Write(bytes))
-	}
-}
-
 func (s *Swagger) MarshalJSON() ([]byte, error) {
 	return s.buildSwagger().MarshalJSON()
 }
@@ -107,15 +85,9 @@ func (s *Swagger) MarshalYAML() ([]byte, error) {
 }
 
 func New(handles ...func(swag *Swagger)) *Swagger {
-	swagger := &Swagger{
-		Config:      DefaultCfg(),
-		Description: fmt.Sprintf("project:%s version:%s commit:%s", version.Project(), version.Version(), version.CommitID()),
-		Version:     version.Version(),
-	}
-
+	swagger := &Swagger{}
 	for i := range handles {
 		handles[i](swagger)
 	}
-
 	return swagger
 }

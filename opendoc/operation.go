@@ -1,12 +1,13 @@
 package opendoc
 
 import (
+	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
 
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/pubgo/funk/assert"
+	"github.com/samber/lo"
 
 	"github.com/pubgo/opendoc/security"
 )
@@ -31,6 +32,11 @@ type Operation struct {
 
 func (op *Operation) AddSecurity(security ...security.Security) *Operation {
 	op.securities = append(op.securities, security...)
+	return op
+}
+
+func (op *Operation) AddTags(tags ...string) *Operation {
+	op.tags = append(op.tags, tags...)
 	return op
 }
 
@@ -73,7 +79,9 @@ func (op *Operation) SetSummary(summary string) *Operation {
 }
 
 func (op *Operation) SetPath(path string) *Operation {
-	assert.If(path == "", "path should not be null")
+	if path == "" {
+		log.Panic("path should not be null")
+	}
 
 	path = strings.TrimSpace(path)
 	path = strings.Trim(path, "/")
@@ -82,7 +90,10 @@ func (op *Operation) SetPath(path string) *Operation {
 }
 
 func (op *Operation) SetOperation(operationID string) *Operation {
-	assert.If(operationID == "", "operationID should not be nil")
+	if operationID == "" {
+		log.Panic("operationID should not be nil")
+	}
+
 	op.operationID = operationID
 	return op
 }
@@ -110,7 +121,7 @@ func (op *Operation) Openapi(item *openapi3.PathItem) {
 	}
 
 	operation := &openapi3.Operation{
-		Tags:        op.tags,
+		Tags:        lo.Uniq(op.tags),
 		OperationID: op.operationID,
 		Summary:     op.summary,
 		Description: op.description,

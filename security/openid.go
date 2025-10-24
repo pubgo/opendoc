@@ -8,9 +8,7 @@ type OpenID struct {
 	ConnectUrl string
 }
 
-func (i OpenID) Provider() string {
-	return "OpenIdConnect"
-}
+func (i OpenID) Provider() AuthProviderType { return AuthProviderTypeOIDC }
 
 func (i OpenID) Scheme() *openapi3.SecurityScheme {
 	return &openapi3.SecurityScheme{

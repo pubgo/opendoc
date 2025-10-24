@@ -28,6 +28,11 @@ func (s *Service) SetName(name string) *Service {
 	return s
 }
 
+func (s *Service) AddTags(tags ...string) *Service {
+	s.tags = append(s.tags, tags...)
+	return s
+}
+
 func (s *Service) AddContentType(contentType ...string) *Service {
 	s.contentType = append(s.contentType, contentType...)
 	return s
