@@ -1,4 +1,4 @@
-package templates
+package docs
 
 // https://spec.openapis.org/oas/latest.html
 // https://swagger.io/specification/
@@ -13,3 +13,6 @@ package templates
 // https://github.com/swaggest/jsonschema-go
 // https://github.com/swaggest/openapi-go
 // https://github.com/santhosh-tekuri/jsonschema
+
+// https://swagger.io/docs/open-source-tools/swagger-ui/usage/configuration/
+// https://rapidocweb.com/api.html#att-general

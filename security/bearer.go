@@ -6,9 +6,7 @@ import (
 
 type Bearer struct{}
 
-func (b Bearer) Provider() string {
-	return "Bearer"
-}
+func (b Bearer) Provider() AuthProviderType { return AuthProviderTypeBearer }
 
 func (b Bearer) Scheme() *openapi3.SecurityScheme {
 	return &openapi3.SecurityScheme{

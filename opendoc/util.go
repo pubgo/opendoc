@@ -1,7 +1,10 @@
 package opendoc
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"log/slog"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -12,10 +15,8 @@ import (
 
 	"github.com/fatih/structtag"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/goccy/go-json"
-	"github.com/pubgo/funk/assert"
-	"github.com/pubgo/funk/log"
 	"github.com/pubgo/opendoc/security"
+	"github.com/samber/lo"
 )
 
 func getTag(tags *structtag.Tags, key string, fn func(tag *structtag.Tag)) {
@@ -37,7 +38,9 @@ func checkModelType(model interface{}) {
 		t = t.Elem()
 	}
 
-	assert.If(t.Kind() != reflect.Struct, "The native type of model should be struct")
+	if t.Kind() != reflect.Struct {
+		panic("The native type of model should be struct")
+	}
 }
 
 func getSchemaName(val interface{}) string {
@@ -76,8 +79,8 @@ func GetCanonicalTypeName(val interface{}) string {
 func getSecurityRequirements(securities []security.Security) *openapi3.SecurityRequirements {
 	securityRequirements := openapi3.NewSecurityRequirements()
 	for _, s := range securities {
-		securityRequirements.With(openapi3.NewSecurityRequirement().Authenticate(s.Provider()))
-		components.SecuritySchemes[s.Provider()] = &openapi3.SecuritySchemeRef{Value: s.Scheme()}
+		securityRequirements.With(openapi3.NewSecurityRequirement().Authenticate(string(s.Provider())))
+		components.SecuritySchemes[string(s.Provider())] = &openapi3.SecuritySchemeRef{Value: s.Scheme()}
 	}
 	return securityRequirements
 }
@@ -94,7 +97,9 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 		model = model.Elem()
 	}
 
-	assert.If(model.Kind() == reflect.Interface, "type:%s kind should not be interface", model)
+	if model.Kind() == reflect.Interface {
+		panic(fmt.Sprintf("type:%s kind should not be interface", model))
+	}
 
 	switch model {
 	case reflect.TypeOf([]byte{}):
@@ -175,7 +180,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 
 		for i := 0; i < model.NumField(); i++ {
 			field := model.Field(i)
-			tags := assert.Must1(structtag.Parse(string(field.Tag)))
+			tags := lo.Must1(structtag.Parse(string(field.Tag)))
 			if isParameter(tags) {
 				continue
 			}
@@ -209,7 +214,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			getTag(tags, defaultName, func(tag *structtag.Tag) { fieldSchema.Default = tag.Name })
 			getTag(tags, example, func(tag *structtag.Tag) {
 				if err := json.Unmarshal([]byte(tag.Value()), &fieldSchema.Example); err != nil {
-					log.Err(err).Str("tag-value", tag.Value()).Msg("failed to unmarshal example")
+					slog.Error("failed to unmarshal example", "tag-value", tag.Value())
 				}
 			})
 			getTag(tags, validate, func(tag *structtag.Tag) {
@@ -224,6 +229,8 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			schema.Properties[tag.Name] = openapi3.NewSchemaRef("", fieldSchema)
 		}
 		return getComponentName(schemaName), schema
+	default:
+		panic("unhandled default case")
 	}
 
 	return "", schema
@@ -273,7 +280,9 @@ func isParameter(val *structtag.Tags) bool {
 }
 
 func genParameters(val interface{}) openapi3.Parameters {
-	assert.If(val == nil, "val is nil")
+	if val == nil {
+		log.Panicln("val is nil")
+	}
 
 	var model reflect.Type
 	if _t, ok := val.(reflect.Type); ok {
@@ -286,12 +295,14 @@ func genParameters(val interface{}) openapi3.Parameters {
 		model = model.Elem()
 	}
 
-	assert.If(model.Kind() != reflect.Struct, "type:%s kind should be struct", model)
+	if model.Kind() != reflect.Struct {
+		log.Panicf("type:%s kind should be struct", model)
+	}
 
 	parameters := openapi3.NewParameters()
 	for i := 0; i < model.NumField(); i++ {
 		field := model.Field(i)
-		tags := assert.Must1(structtag.Parse(string(field.Tag)))
+		tags := lo.Must1(structtag.Parse(string(field.Tag)))
 		if !isParameter(tags) {
 			continue
 		}

@@ -5,7 +5,8 @@ import (
 	"html/template"
 	"net/http"
 
-	"github.com/pubgo/funk/assert"
+	"github.com/pubgo/opendoc/opendoc"
+	"github.com/samber/lo"
 )
 
 //go:embed redoc.html
@@ -18,15 +19,15 @@ var swaggerFile string
 var rApiDocFile string
 
 var (
-	reDocTemplate       = assert.Exit1(template.New("").Parse(reDocFile))
-	swaggerTemplate     = assert.Exit1(template.New("").Parse(swaggerFile))
-	rApiDocFileTemplate = assert.Exit1(template.New("").Parse(rApiDocFile))
+	reDocTemplate       = lo.Must(template.New("").Parse(reDocFile))
+	swaggerTemplate     = lo.Must(template.New("").Parse(swaggerFile))
+	rApiDocFileTemplate = lo.Must(template.New("").Parse(rApiDocFile))
 )
 
 func RApiDocHandler(url string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "text/html")
-		assert.Must(rApiDocFileTemplate.Execute(writer, map[string]string{
+		lo.Must0(rApiDocFileTemplate.Execute(writer, map[string]string{
 			"openapi_url":     url,
 			"openapi_options": `{}`,
 		}))
@@ -36,7 +37,7 @@ func RApiDocHandler(url string) http.HandlerFunc {
 func ReDocHandler(title, url string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "text/html")
-		assert.Must(reDocTemplate.Execute(writer, map[string]string{
+		lo.Must0(reDocTemplate.Execute(writer, map[string]string{
 			"title":           title,
 			"openapi_url":     url,
 			"openapi_options": `{}`,
@@ -47,10 +48,25 @@ func ReDocHandler(title, url string) http.HandlerFunc {
 func SwaggerHandler(title, url string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Set("Content-Type", "text/html")
-		assert.Must(swaggerTemplate.Execute(writer, map[string]string{
+		lo.Must0(swaggerTemplate.Execute(writer, map[string]string{
 			"title":           title,
 			"openapi_url":     url,
 			"openapi_options": `{}`,
 		}))
+	}
+}
+
+func InitRouter(r *http.ServeMux, s *opendoc.Swagger, cfg Config) {
+	title := s.Title
+	r.Handle(cfg.OpenapiRouter, SwaggerHandler(title, cfg.OpenapiUrl))
+	r.Handle(cfg.OpenapiRedocRouter, ReDocHandler(title, cfg.OpenapiUrl))
+	r.Handle(cfg.OpenapiRApiDocRouter, RApiDocHandler(cfg.OpenapiUrl))
+	r.Handle(cfg.OpenapiUrl, openapiDataHandler(s))
+}
+
+func openapiDataHandler(s *opendoc.Swagger) http.HandlerFunc {
+	bytes := lo.Must1(s.MarshalYAML())
+	return func(writer http.ResponseWriter, request *http.Request) {
+		lo.Must1(writer.Write(bytes))
 	}
 }

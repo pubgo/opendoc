@@ -11,9 +11,7 @@ type OAuth2 struct {
 	Scopes           map[string]string
 }
 
-func (i OAuth2) Provider() string {
-	return "OAuth2"
-}
+func (i OAuth2) Provider() AuthProviderType { return AuthProviderTypeOAuth2 }
 
 func (i OAuth2) Scheme() *openapi3.SecurityScheme {
 	return &openapi3.SecurityScheme{
