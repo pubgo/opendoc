@@ -5,6 +5,16 @@ import (
 )
 
 type Security interface {
-	Provider() string
+	Provider() AuthProviderType
 	Scheme() *openapi3.SecurityScheme
 }
+
+type AuthProviderType string
+
+const (
+	AuthProviderTypeBasic  AuthProviderType = "Basic"
+	AuthProviderTypeApiKey AuthProviderType = "ApiKey"
+	AuthProviderTypeBearer AuthProviderType = "Bearer"
+	AuthProviderTypeOAuth2 AuthProviderType = "OAuth2"
+	AuthProviderTypeOIDC   AuthProviderType = "OIDC"
+)

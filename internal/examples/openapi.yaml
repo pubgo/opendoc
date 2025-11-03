@@ -98,8 +98,8 @@ info:
         name: Apache License 2.0
         url: https://github.com/pubgo/opendoc/blob/master/LICENSE
     termsOfService: https://github.com/pubgo
-    title: 'this service web title '
-    version: v0.0.1-dev-99
+    title: ""
+    version: ""
 openapi: 3.0.0
 paths:
     /api/v1/articles:

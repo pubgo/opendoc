@@ -7,13 +7,14 @@ import (
 type Basic struct{}
 
 type User struct {
+	// Username basic auth username
 	Username string
+
+	// Password basic auth password
 	Password string
 }
 
-func (b Basic) Provider() string {
-	return "Basic"
-}
+func (b Basic) Provider() AuthProviderType { return AuthProviderTypeBasic }
 
 func (b Basic) Scheme() *openapi3.SecurityScheme {
 	return &openapi3.SecurityScheme{
