@@ -27,7 +27,7 @@ func getTag(tags *structtag.Tags, key string, fn func(tag *structtag.Tag)) {
 	}
 }
 
-func checkModelType(model interface{}) {
+func checkModelType(model any) {
 	var t reflect.Type
 	if _t, ok := model.(reflect.Type); ok {
 		t = _t
@@ -44,7 +44,7 @@ func checkModelType(model interface{}) {
 	}
 }
 
-func getSchemaName(val interface{}) string {
+func getSchemaName(val any) string {
 	return ToRESTFriendlyName(GetCanonicalTypeName(val))
 }
 
@@ -52,7 +52,7 @@ func getComponentName(name string) string {
 	return fmt.Sprintf("#/components/schemas/%s", name)
 }
 
-func GetCanonicalTypeName(val interface{}) string {
+func GetCanonicalTypeName(val any) string {
 	var model reflect.Type
 	if typ, ok := val.(reflect.Type); ok {
 		model = typ
@@ -86,7 +86,7 @@ func getSecurityRequirements(securities []security.Security) *openapi3.SecurityR
 	return securityRequirements
 }
 
-func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
+func genSchema(val any) (ref string, schema *openapi3.Schema) {
 	var model reflect.Type
 	if _t, ok := val.(reflect.Type); ok {
 		model = _t
@@ -237,7 +237,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 	return "", schema
 }
 
-func genRequestBody(model interface{}, contentType ...string) *openapi3.RequestBodyRef {
+func genRequestBody(model any, contentType ...string) *openapi3.RequestBodyRef {
 	if len(contentType) == 0 {
 		contentType = []string{"application/json"}
 	}
@@ -249,7 +249,7 @@ func genRequestBody(model interface{}, contentType ...string) *openapi3.RequestB
 	return body
 }
 
-func genResponses(response interface{}, contentType ...string) *openapi3.Responses {
+func genResponses(response any, contentType ...string) *openapi3.Responses {
 	if len(contentType) == 0 {
 		contentType = []string{"application/json"}
 	}
@@ -280,7 +280,7 @@ func isParameter(val *structtag.Tags) bool {
 	return false
 }
 
-func genParameters(val interface{}) openapi3.Parameters {
+func genParameters(val any) openapi3.Parameters {
 	if val == nil {
 		log.Panicln("val is nil")
 	}

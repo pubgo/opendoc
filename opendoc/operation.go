@@ -25,8 +25,8 @@ type Operation struct {
 	operationID         string
 	exclude             bool
 	securities          []security.Security
-	request             interface{}
-	response            interface{}
+	request             any
+	response            any
 	responses           map[string]*openapi3.ResponseRef
 }
 
@@ -45,7 +45,7 @@ func (op *Operation) SetExclude(exclude bool) *Operation {
 	return op
 }
 
-func (op *Operation) AddResponse(name string, resp interface{}) *Operation {
+func (op *Operation) AddResponse(name string, resp any) *Operation {
 	if op.responses == nil {
 		op.responses = make(map[string]*openapi3.ResponseRef)
 	}
@@ -98,7 +98,7 @@ func (op *Operation) SetOperation(operationID string) *Operation {
 	return op
 }
 
-func (op *Operation) SetModel(req, rsp interface{}) *Operation {
+func (op *Operation) SetModel(req, rsp any) *Operation {
 	checkModelType(req)
 	op.request = req
 

@@ -13,45 +13,45 @@ type (
 
 // NamedEnum returns the enumerated acceptable values with according string names.
 type NamedEnum interface {
-	NamedEnum() ([]interface{}, []string)
+	NamedEnum() ([]any, []string)
 }
 
 // Enum returns the enumerated acceptable values.
 type Enum interface {
-	Enum() []interface{}
+	Enum() []any
 }
 
 // OneOfExposer exposes "oneOf" items as list of samples.
 type OneOfExposer interface {
-	JSONSchemaOneOf() []interface{}
+	JSONSchemaOneOf() []any
 }
 
 // AnyOfExposer exposes "anyOf" items as list of samples.
 type AnyOfExposer interface {
-	JSONSchemaAnyOf() []interface{}
+	JSONSchemaAnyOf() []any
 }
 
 // AllOfExposer exposes "allOf" items as list of samples.
 type AllOfExposer interface {
-	JSONSchemaAllOf() []interface{}
+	JSONSchemaAllOf() []any
 }
 
 // NotExposer exposes "not" schema as a sample.
 type NotExposer interface {
-	JSONSchemaNot() interface{}
+	JSONSchemaNot() any
 }
 
 // IfExposer exposes "if" schema as a sample.
 type IfExposer interface {
-	JSONSchemaIf() interface{}
+	JSONSchemaIf() any
 }
 
 // ThenExposer exposes "then" schema as a sample.
 type ThenExposer interface {
-	JSONSchemaThen() interface{}
+	JSONSchemaThen() any
 }
 
 // ElseExposer exposes "else" schema as a sample.
 type ElseExposer interface {
-	JSONSchemaElse() interface{}
+	JSONSchemaElse() any
 }
