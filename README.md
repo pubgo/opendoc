@@ -14,6 +14,7 @@
 - 支持子应用挂载和独立文档
 - 可在生产环境中禁用文档功能
 - 与 HTTP 框架无关，可集成到任何 Go HTTP 项目
+- 提供丰富的 API 访问方法，便于程序化操作
 
 ## 安装
 
@@ -57,6 +58,7 @@ func main() {
 	doc := opendoc.New(func(swag *opendoc.Swagger) {
 		swag.Title = "this service web title "
 		swag.Description = "this is description"
+		swag.Version = "1.0.0"
 		swag.License = &opendoc.License{
 			Name: "Apache License 2.0",
 			URL:  "https://github.com/pubgo/opendoc/blob/master/LICENSE",
@@ -79,6 +81,7 @@ func main() {
 			op.SetOperation("article_create")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
 			op.SetSummary("create article")
+			op.SetDescription("Creates a new article with the provided data")
 		})
 
 		srv.GetOf(func(op *opendoc.Operation) {
@@ -86,7 +89,7 @@ func main() {
 			op.SetOperation("article_list")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
 			op.SetSummary("get article list")
-			op.AddResponse("Test", new(TestQueryReq))
+			op.SetDescription("Retrieves a list of articles")
 		})
 
 		srv.PutOf(func(op *opendoc.Operation) {
@@ -94,6 +97,7 @@ func main() {
 			op.SetOperation("article_update")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
 			op.SetSummary("update article")
+			op.SetDescription("Updates an existing article by ID")
 		})
 
 		srv.DeleteOf(func(op *opendoc.Operation) {
@@ -101,6 +105,7 @@ func main() {
 			op.SetOperation("article_delete")
 			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
 			op.SetSummary("delete article")
+			op.SetDescription("Deletes an article by ID")
 		})
 	})
 
@@ -110,10 +115,12 @@ func main() {
 	http.HandleFunc("/openapi.json", func(w http.ResponseWriter, r *http.Request) {
 		swagger := doc.BuildSwagger()
 		w.Header().Set("Content-Type", "application/json")
-		_ = swagger.MarshalJSON()
+		data, _ := swagger.MarshalJSON()
+		w.Write(data)
 	})
 
 	fmt.Println("Server starting at :8080")
+	fmt.Println("Visit http://localhost:8080/docs/ for API documentation")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
@@ -201,6 +208,28 @@ type RequestStruct struct {
     Locale string `cookie:"locale" json:"locale"`
 }
 ```
+
+## 便捷方法
+
+OpenDoc 提供了丰富的便捷方法来访问和操作 API 对象：
+
+### Swagger 对象方法
+- `BuildSwagger()` - 构建 OpenAPI 3.0 规范对象
+- `MarshalJSON()` - 序列化为 JSON
+- `MarshalYAML()` - 序列化为 YAML
+
+### Service 对象方法
+- `GetOperations()` - 获取服务中的所有操作
+- `GetPath()` - 获取服务路径前缀
+- `GetName()` - 获取服务名称
+
+### Operation 对象方法
+- `GetPath()` - 获取操作路径
+- `GetMethod()` - 获取 HTTP 方法
+- `GetOperationID()` - 获取操作 ID
+- `GetSummary()` - 获取摘要
+- `GetDescription()` - 获取描述
+- `GetTags()` - 获取标签列表
 
 ## 与其他 HTTP 框架集成
 

@@ -112,3 +112,18 @@ func (s *Service) Openapi() map[string]*openapi3.PathItem {
 	}
 	return routes
 }
+
+// GetOperations returns all operations in the service
+func (s *Service) GetOperations() []*Operation {
+	return s.operations
+}
+
+// GetPath returns the service's prefix path
+func (s *Service) GetPath() string {
+	return s.prefix
+}
+
+// GetName returns the service's name
+func (s *Service) GetName() string {
+	return s.name
+}

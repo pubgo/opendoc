@@ -1,11 +1,60 @@
-name: deploy
+name: Lint & Test
+
 on:
   push:
+    branches: [ master ]
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
+
 jobs:
-  build:
+
+  lint:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Create cache directories
+        run: |
+          mkdir -p ~/.cache/golangci-lint
+          mkdir -p ~/.cache/go-build
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Go Lint Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/golangci-lint/
+          key: go-lint-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-lint-cache-${{ runner.os }}-
+
+      - name: Go Mod Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+          key: go-mod-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            go-mod-cache-${{ runner.os }}-
+
+      - name: Debug Cache Path
+        run: |
+          ls -la ~/.cache/golangci-lint/ || echo "golangci cache path does not exist"
+          ls -la ~/.cache/go-build || echo "go-build cache path does not exist"
+
+      - name: Check go mod
+        run: |
+          go env
+          go mod tidy
+          git diff --exit-code go.mod
+          git diff --exit-code go.sum
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          args: --timeout=10m --verbose
+          skip-cache: false
+        env:
+          GOLANGCI_LINT_CACHE: go-lint-cache-${{ runner.os }}-${{ hashFiles('**/go.sum') }}

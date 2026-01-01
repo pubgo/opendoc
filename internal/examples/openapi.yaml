@@ -1,18 +1,6 @@
 components:
     schemas:
-        TestFileReq.main:
-            type: object
         TestQueryReq.main:
-            properties:
-                name1:
-                    default: test
-                    description: name of model validate:required
-                    nullable: true
-                    type: string
-            required:
-                - name1
-            type: object
-        TestQueryReq1.main:
             properties:
                 name:
                     default: test
@@ -24,14 +12,11 @@ components:
                     description: name1 of model validate:required
                     nullable: true
                     type: string
-                rsp:
-                    $ref: '#/components/schemas/TestQueryRsp.main'
             required:
                 - name
                 - name1
-                - rsp
             type: object
-        TestQueryReqAAA.main:
+        TestQueryReq1.main:
             properties:
                 name:
                     default: test
@@ -49,36 +34,23 @@ components:
             type: object
         TestQueryRsp.main:
             properties:
-                name:
-                    default: test
-                    description: name of model
+                code:
+                    allowEmptyValue: true
                     nullable: true
-                    type: string
-                optional:
+                    type: integer
+                data:
+                    additionalProperties: {}
+                    allowEmptyValue: true
+                    nullable: true
+                    type: object
+                msg:
                     allowEmptyValue: true
                     nullable: true
                     type: string
-                req:
-                    $ref: '#/components/schemas/TestQueryReq.main'
-                token:
-                    default: test
-                    nullable: true
-                    type: string
-                types:
-                    description: 类型
-                    example:
-                        - a
-                        - b
-                    items:
-                        type: string
-                    nullable: true
-                    readOnly: true
-                    type: array
             required:
-                - name
-                - token
-                - optional
-                - req
+                - code
+                - msg
+                - data
             type: object
     securitySchemes:
         Basic:
@@ -98,23 +70,16 @@ info:
         name: Apache License 2.0
         url: https://github.com/pubgo/opendoc/blob/master/LICENSE
     termsOfService: https://github.com/pubgo
-    title: ""
-    version: ""
+    title: 'this service web title '
+    version: 1.0.0
 openapi: 3.0.0
 paths:
     /api/v1/articles:
         get:
+            description: Retrieves a list of articles
             operationId: article_list
             parameters:
-                - description: name of model validate:required
-                  in: query
-                  name: name
-                  required: true
-                  schema:
-                    default: test
-                    type: string
-                - description: required
-                  in: header
+                - in: header
                   name: token
                   required: true
                   schema:
@@ -131,93 +96,47 @@ paths:
                         application/json:
                             schema:
                                 properties:
-                                    name:
-                                        default: test
-                                        description: name of model
+                                    code:
+                                        allowEmptyValue: true
                                         nullable: true
-                                        type: string
-                                    optional:
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
                                         allowEmptyValue: true
                                         nullable: true
                                         type: string
-                                    req:
-                                        $ref: '#/components/schemas/TestQueryReq.main'
-                                    token:
-                                        default: test
-                                        nullable: true
-                                        type: string
-                                    types:
-                                        description: 类型
-                                        example:
-                                            - a
-                                            - b
-                                        items:
-                                            type: string
-                                        nullable: true
-                                        readOnly: true
-                                        type: array
                                 required:
-                                    - name
-                                    - token
-                                    - optional
-                                    - req
+                                    - code
+                                    - msg
+                                    - data
                                 type: object
                     description: OK
-                Test:
-                    content:
-                        application/json:
-                            schema:
-                                properties:
-                                    name:
-                                        default: test
-                                        description: name of model validate:required
-                                        nullable: true
-                                        type: string
-                                    name1:
-                                        default: test
-                                        description: name1 of model validate:required
-                                        nullable: true
-                                        type: string
-                                required:
-                                    - name
-                                    - name1
-                                type: object
-                    description: Test
                 default:
                     content:
                         application/json:
                             schema:
                                 properties:
-                                    name:
-                                        default: test
-                                        description: name of model
+                                    code:
+                                        allowEmptyValue: true
                                         nullable: true
-                                        type: string
-                                    optional:
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
                                         allowEmptyValue: true
                                         nullable: true
                                         type: string
-                                    req:
-                                        $ref: '#/components/schemas/TestQueryReq.main'
-                                    token:
-                                        default: test
-                                        nullable: true
-                                        type: string
-                                    types:
-                                        description: 类型
-                                        example:
-                                            - a
-                                            - b
-                                        items:
-                                            type: string
-                                        nullable: true
-                                        readOnly: true
-                                        type: array
                                 required:
-                                    - name
-                                    - token
-                                    - optional
-                                    - req
+                                    - code
+                                    - msg
+                                    - data
                                 type: object
                     description: OK
             security:
@@ -227,7 +146,99 @@ paths:
             tags:
                 - test article service
         post:
+            description: Creates a new article with the provided data
             operationId: article_create
+            parameters:
+                - in: header
+                  name: token
+                  required: true
+                  schema:
+                    default: test
+                    type: string
+                - in: query
+                  name: optional
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            properties:
+                                name:
+                                    default: test
+                                    description: name of model validate:required
+                                    nullable: true
+                                    type: string
+                                name1:
+                                    default: test
+                                    description: name1 of model validate:required
+                                    nullable: true
+                                    type: string
+                            required:
+                                - name
+                                - name1
+                            type: object
+                required: true
+            responses:
+                "200":
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    code:
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: string
+                                required:
+                                    - code
+                                    - msg
+                                    - data
+                                type: object
+                    description: OK
+                default:
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    code:
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: string
+                                required:
+                                    - code
+                                    - msg
+                                    - data
+                                type: object
+                    description: OK
+            security:
+                - Basic: []
+                - Bearer: []
+            summary: create article
+            tags:
+                - test article service
+    /api/v1/articles/{id}:
+        delete:
+            description: Deletes an article by ID
+            operationId: article_delete
             parameters:
                 - description: id of model validate:required
                   in: path
@@ -262,12 +273,9 @@ paths:
                                     description: name1 of model validate:required
                                     nullable: true
                                     type: string
-                                rsp:
-                                    $ref: '#/components/schemas/TestQueryRsp.main'
                             required:
                                 - name
                                 - name1
-                                - rsp
                             type: object
                 required: true
             responses:
@@ -276,36 +284,23 @@ paths:
                         application/json:
                             schema:
                                 properties:
-                                    name:
-                                        default: test
-                                        description: name of model
+                                    code:
+                                        allowEmptyValue: true
                                         nullable: true
-                                        type: string
-                                    optional:
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
                                         allowEmptyValue: true
                                         nullable: true
                                         type: string
-                                    req:
-                                        $ref: '#/components/schemas/TestQueryReq.main'
-                                    token:
-                                        default: test
-                                        nullable: true
-                                        type: string
-                                    types:
-                                        description: 类型
-                                        example:
-                                            - a
-                                            - b
-                                        items:
-                                            type: string
-                                        nullable: true
-                                        readOnly: true
-                                        type: array
                                 required:
-                                    - name
-                                    - token
-                                    - optional
-                                    - req
+                                    - code
+                                    - msg
+                                    - data
                                 type: object
                     description: OK
                 default:
@@ -313,46 +308,33 @@ paths:
                         application/json:
                             schema:
                                 properties:
-                                    name:
-                                        default: test
-                                        description: name of model
+                                    code:
+                                        allowEmptyValue: true
                                         nullable: true
-                                        type: string
-                                    optional:
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
                                         allowEmptyValue: true
                                         nullable: true
                                         type: string
-                                    req:
-                                        $ref: '#/components/schemas/TestQueryReq.main'
-                                    token:
-                                        default: test
-                                        nullable: true
-                                        type: string
-                                    types:
-                                        description: 类型
-                                        example:
-                                            - a
-                                            - b
-                                        items:
-                                            type: string
-                                        nullable: true
-                                        readOnly: true
-                                        type: array
                                 required:
-                                    - name
-                                    - token
-                                    - optional
-                                    - req
+                                    - code
+                                    - msg
+                                    - data
                                 type: object
                     description: OK
             security:
                 - Basic: []
                 - Bearer: []
-            summary: create article
+            summary: delete article
             tags:
                 - test article service
-    /api/v1/articles/{id}:
         put:
+            description: Updates an existing article by ID
             operationId: article_update
             parameters:
                 - description: id of model validate:required
@@ -388,12 +370,9 @@ paths:
                                     description: name1 of model validate:required
                                     nullable: true
                                     type: string
-                                rsp:
-                                    $ref: '#/components/schemas/TestQueryRsp.main'
                             required:
                                 - name
                                 - name1
-                                - rsp
                             type: object
                 required: true
             responses:
@@ -402,36 +381,23 @@ paths:
                         application/json:
                             schema:
                                 properties:
-                                    name:
-                                        default: test
-                                        description: name of model
+                                    code:
+                                        allowEmptyValue: true
                                         nullable: true
-                                        type: string
-                                    optional:
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
                                         allowEmptyValue: true
                                         nullable: true
                                         type: string
-                                    req:
-                                        $ref: '#/components/schemas/TestQueryReq.main'
-                                    token:
-                                        default: test
-                                        nullable: true
-                                        type: string
-                                    types:
-                                        description: 类型
-                                        example:
-                                            - a
-                                            - b
-                                        items:
-                                            type: string
-                                        nullable: true
-                                        readOnly: true
-                                        type: array
                                 required:
-                                    - name
-                                    - token
-                                    - optional
-                                    - req
+                                    - code
+                                    - msg
+                                    - data
                                 type: object
                     description: OK
                 default:
@@ -439,44 +405,25 @@ paths:
                         application/json:
                             schema:
                                 properties:
-                                    name:
-                                        default: test
-                                        description: name of model
+                                    code:
+                                        allowEmptyValue: true
                                         nullable: true
-                                        type: string
-                                    optional:
+                                        type: integer
+                                    data:
+                                        additionalProperties: {}
+                                        allowEmptyValue: true
+                                        nullable: true
+                                        type: object
+                                    msg:
                                         allowEmptyValue: true
                                         nullable: true
                                         type: string
-                                    req:
-                                        $ref: '#/components/schemas/TestQueryReq.main'
-                                    token:
-                                        default: test
-                                        nullable: true
-                                        type: string
-                                    types:
-                                        description: 类型
-                                        example:
-                                            - a
-                                            - b
-                                        items:
-                                            type: string
-                                        nullable: true
-                                        readOnly: true
-                                        type: array
                                 required:
-                                    - name
-                                    - token
-                                    - optional
-                                    - req
+                                    - code
+                                    - msg
+                                    - data
                                 type: object
                     description: OK
-                error:
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                    description: error
             security:
                 - Basic: []
                 - Bearer: []

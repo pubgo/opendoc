@@ -65,7 +65,7 @@ func (op *Operation) SetDescription(description string) *Operation {
 		return op
 	}
 
-	op.summary = description
+	op.description = description
 	return op
 }
 
@@ -156,4 +156,34 @@ func (op *Operation) Openapi(item *openapi3.PathItem) {
 	case http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete:
 		operation.RequestBody = genRequestBody(op.request, op.requestContentType...)
 	}
+}
+
+// GetPath returns the operation's path
+func (op *Operation) GetPath() string {
+	return op.path
+}
+
+// GetMethod returns the operation's HTTP method
+func (op *Operation) GetMethod() string {
+	return op.method
+}
+
+// GetOperationID returns the operation's ID
+func (op *Operation) GetOperationID() string {
+	return op.operationID
+}
+
+// GetSummary returns the operation's summary
+func (op *Operation) GetSummary() string {
+	return op.summary
+}
+
+// GetDescription returns the operation's description
+func (op *Operation) GetDescription() string {
+	return op.description
+}
+
+// GetTags returns the operation's tags
+func (op *Operation) GetTags() []string {
+	return op.tags
 }
