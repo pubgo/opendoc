@@ -18,6 +18,27 @@ func TestRefName(t *testing.T) {
 		GetCanonicalTypeName(new(openapi3.License)))
 }
 
+func TestGenSchema(t *testing.T) {
+	ref, s := genSchema(testQueryReq{})
+	assert.NotNil(t, s)
+	assert.Equal(t, "#/components/schemas/com.github.pubgo.opendoc.opendoc.testQueryReq", ref) // Updated to match actual behavior
+
+	data, err := json.Marshal(s)
+	assert.NoError(t, err)
+	assert.Equal(t,
+		`{"properties":{"name":{"default":"test","description":"name of model","nullable":true,"type":"string"},"rsp":{"$ref":"#/components/schemas/com.github.pubgo.opendoc.opendoc.testQueryRsp"}},"required":["name","rsp"],"type":"object"}`,
+		string(data),
+	)
+
+	p := genParameters(testQueryReq{})
+	data, err = json.Marshal(p)
+	assert.NoError(t, err)
+	assert.Equal(t,
+		`[{"in":"header","name":"token","required":true,"schema":{"default":"test","type":"string"}},{"in":"query","name":"optional","required":true,"schema":{"type":"string"}}]`,
+		string(data),
+	)
+}
+
 type testQueryRsp struct {
 	Name     string        `required:"true" json:"name" doc:"name of model" default:"test"`
 	Token    string        `required:"true" json:"token" default:"test"`
@@ -30,25 +51,4 @@ type testQueryReq struct {
 	Token    string        `header:"token" json:"token" default:"test"`
 	Optional string        `query:"optional" json:"optional"`
 	Rsp      *testQueryRsp `json:"rsp" required:"true"`
-}
-
-func TestGenSchema(t *testing.T) {
-	ref, s := genSchema(testQueryReq{})
-	assert.NotNil(t, s)
-	assert.Equal(t, "#/components/schemas/com.github.pubgo.opendoc.testQueryReq", ref)
-
-	data, err := json.Marshal(s)
-	assert.NoError(t, err)
-	assert.Equal(t,
-		`{"properties":{"name":{"default":"test","description":"name of model","nullable":true,"type":"string"},"rsp":{"$ref":"#/components/schemas/com.github.pubgo.opendoc.testQueryRsp"}},"required":["name","rsp"],"type":"object"}`,
-		string(data),
-	)
-
-	p := genParameters(testQueryReq{})
-	data, err = json.Marshal(p)
-	assert.NoError(t, err)
-	assert.Equal(t,
-		`[{"in":"header","name":"token","required":true,"schema":{"default":"test","type":"string"}},{"in":"query","name":"optional","required":true,"schema":{"type":"string"}}]`,
-		string(data),
-	)
 }

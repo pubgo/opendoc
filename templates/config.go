@@ -4,11 +4,11 @@ package templates
 // https://rapidocweb.com/api.html#att-general
 
 type Config struct {
-	OpenapiRouter        string                 `yaml:"path"`
-	OpenapiRedocRouter   string                 `yaml:"redoc-path"`
-	OpenapiRApiDocRouter string                 `yaml:"rapidoc-path"`
-	OpenapiUrl           string                 `yaml:"openapi-path"`
-	OpenapiOpt           map[string]interface{} `yaml:"options"`
+	OpenapiRouter        string         `yaml:"path"`
+	OpenapiRedocRouter   string         `yaml:"redoc-path"`
+	OpenapiRApiDocRouter string         `yaml:"rapidoc-path"`
+	OpenapiUrl           string         `yaml:"openapi-path"`
+	OpenapiOpt           map[string]any `yaml:"options"`
 }
 
 func DefaultCfg() Config {
@@ -17,6 +17,6 @@ func DefaultCfg() Config {
 		OpenapiRedocRouter:   "/debug/redocs",
 		OpenapiRApiDocRouter: "/debug/apidocs",
 		OpenapiUrl:           "/debug/docs/openapi.yaml",
-		OpenapiOpt:           make(map[string]interface{}),
+		OpenapiOpt:           make(map[string]any),
 	}
 }

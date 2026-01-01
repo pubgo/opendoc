@@ -48,6 +48,7 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 		Servers:    s.Servers,
 		Components: &components,
 		Info: &openapi3.Info{
+			Title:          s.Title,
 			Description:    s.Description,
 			TermsOfService: s.TermsOfService,
 			Contact:        s.Contact,
@@ -69,6 +70,10 @@ func (s *Swagger) buildSwagger() *openapi3.T {
 	t.Paths = openapi3.NewPaths(opts...)
 
 	return t
+}
+
+func (s *Swagger) BuildSwagger() *openapi3.T {
+	return s.buildSwagger()
 }
 
 func (s *Swagger) MarshalJSON() ([]byte, error) {

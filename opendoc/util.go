@@ -27,7 +27,7 @@ func getTag(tags *structtag.Tags, key string, fn func(tag *structtag.Tag)) {
 	}
 }
 
-func checkModelType(model interface{}) {
+func checkModelType(model any) {
 	var t reflect.Type
 	if _t, ok := model.(reflect.Type); ok {
 		t = _t
@@ -44,7 +44,7 @@ func checkModelType(model interface{}) {
 	}
 }
 
-func getSchemaName(val interface{}) string {
+func getSchemaName(val any) string {
 	return ToRESTFriendlyName(GetCanonicalTypeName(val))
 }
 
@@ -52,7 +52,7 @@ func getComponentName(name string) string {
 	return fmt.Sprintf("#/components/schemas/%s", name)
 }
 
-func GetCanonicalTypeName(val interface{}) string {
+func GetCanonicalTypeName(val any) string {
 	var model reflect.Type
 	if typ, ok := val.(reflect.Type); ok {
 		model = typ
@@ -86,7 +86,23 @@ func getSecurityRequirements(securities []security.Security) *openapi3.SecurityR
 	return securityRequirements
 }
 
-func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
+// IsRequired checks if a field is required based on its tags
+func IsRequired(tags *structtag.Tags) bool {
+	requiredTag, err := tags.Get(required)
+	if err == nil {
+		// 如果存在 required 标签，则根据其值判断
+		return requiredTag.Name == "true"
+	}
+
+	jsonTag, err := tags.Get(jsonTag)
+	if err == nil {
+		return !jsonTag.HasOption(omitempty)
+	}
+
+	return false
+}
+
+func genSchema(val any) (ref string, schema *openapi3.Schema) {
 	var model reflect.Type
 	if _t, ok := val.(reflect.Type); ok {
 		model = _t
@@ -169,7 +185,22 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 		schema.Items = openapi3.NewSchemaRef(genSchema(model.Elem()))
 	case reflect.Map:
 		schema = openapi3.NewObjectSchema()
-		schema.Items = openapi3.NewSchemaRef(genSchema(model))
+		// For map[string]interface{}, we should set AdditionalProperties
+		if model.Elem().Kind() == reflect.Interface {
+			// Use an empty schema for interface{} values to avoid infinite recursion
+			props := openapi3.AdditionalProperties{
+				Schema: &openapi3.SchemaRef{Value: openapi3.NewSchema()},
+			}
+			schema.AdditionalProperties = props
+		} else {
+			// Generate schema for the map element type
+			_, elemSchema := genSchema(model.Elem())
+			props := openapi3.AdditionalProperties{
+				Schema: &openapi3.SchemaRef{Value: elemSchema},
+			}
+			schema.AdditionalProperties = props
+		}
+		return "", schema
 	case reflect.Struct:
 		schemaName := getSchemaName(val)
 		if ss := components.Schemas[schemaName]; ss != nil {
@@ -191,7 +222,12 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 				continue
 			}
 
-			if !tag.HasOption(omitempty) {
+			// Check if field is required based on struct tags
+			requiredTag, _ := tags.Get(required)
+			if requiredTag != nil && requiredTag.Name == "true" {
+				schema.Required = append(schema.Required, tag.Name)
+			} else if !tag.HasOption(omitempty) {
+				// Fallback to checking for omitempty option
 				schema.Required = append(schema.Required, tag.Name)
 			}
 
@@ -207,7 +243,12 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 			getTag(tags, nullable, func(_ *structtag.Tag) { fieldSchema.Nullable = true })
 			getTag(tags, readOnly, func(_ *structtag.Tag) { fieldSchema.ReadOnly = true })
 			getTag(tags, writeOnly, func(_ *structtag.Tag) { fieldSchema.WriteOnly = true })
-			getTag(tags, required, func(_ *structtag.Tag) { fieldSchema.AllowEmptyValue = false })
+			getTag(tags, required, func(_ *structtag.Tag) {
+				if _t, err := tags.Get(required); err == nil && _t.Name == "true" {
+					// Mark as required by removing AllowEmptyValue
+					fieldSchema.AllowEmptyValue = false
+				}
+			})
 			getTag(tags, doc, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
 			getTag(tags, description, func(tag *structtag.Tag) { fieldSchema.Description = tag.Name })
 			getTag(tags, format, func(tag *structtag.Tag) { fieldSchema.Format = tag.Name })
@@ -237,7 +278,7 @@ func genSchema(val interface{}) (ref string, schema *openapi3.Schema) {
 	return "", schema
 }
 
-func genRequestBody(model interface{}, contentType ...string) *openapi3.RequestBodyRef {
+func genRequestBody(model any, contentType ...string) *openapi3.RequestBodyRef {
 	if len(contentType) == 0 {
 		contentType = []string{"application/json"}
 	}
@@ -249,7 +290,7 @@ func genRequestBody(model interface{}, contentType ...string) *openapi3.RequestB
 	return body
 }
 
-func genResponses(response interface{}, contentType ...string) *openapi3.Responses {
+func genResponses(response any, contentType ...string) *openapi3.Responses {
 	if len(contentType) == 0 {
 		contentType = []string{"application/json"}
 	}
@@ -280,7 +321,7 @@ func isParameter(val *structtag.Tags) bool {
 	return false
 }
 
-func genParameters(val interface{}) openapi3.Parameters {
+func genParameters(val any) openapi3.Parameters {
 	if val == nil {
 		log.Panicln("val is nil")
 	}
@@ -321,28 +362,53 @@ func genParameters(val interface{}) openapi3.Parameters {
 		parameter := new(openapi3.Parameter)
 		getTag(tags, queryTag, func(tag *structtag.Tag) {
 			parameter = openapi3.NewQueryParameter(tag.Name)
-			if !tag.HasOption(omitempty) {
+			// Check required tag first, then fallback to omitempty
+			requiredTag, _ := tags.Get(required)
+			if requiredTag != nil && requiredTag.Name == "true" {
+				parameter.Required = true
+			} else if !tag.HasOption(omitempty) {
 				parameter.Required = true
 			}
 		})
 
 		getTag(tags, headerTag, func(tag *structtag.Tag) {
 			parameter = openapi3.NewHeaderParameter(tag.Name)
-			if !tag.HasOption(omitempty) {
+			// Check required tag first, then fallback to omitempty
+			requiredTag, _ := tags.Get(required)
+			if requiredTag != nil && requiredTag.Name == "true" {
+				parameter.Required = true
+			} else if !tag.HasOption(omitempty) {
 				parameter.Required = true
 			}
 		})
 
 		getTag(tags, cookieTag, func(tag *structtag.Tag) {
 			parameter = openapi3.NewCookieParameter(tag.Name)
-			if !tag.HasOption(omitempty) {
+			// Check required tag first, then fallback to omitempty
+			requiredTag, _ := tags.Get(required)
+			if requiredTag != nil && requiredTag.Name == "true" {
+				parameter.Required = true
+			} else if !tag.HasOption(omitempty) {
 				parameter.Required = true
 			}
 		})
 
-		getTag(tags, required, func(tag *structtag.Tag) { parameter.Required = true })
-		getTag(tags, uriTag, func(tag *structtag.Tag) { parameter = openapi3.NewPathParameter(tag.Name) })
-		getTag(tags, pathTag, func(tag *structtag.Tag) { parameter = openapi3.NewPathParameter(tag.Name) })
+		// Handle required for all parameter types
+		getTag(tags, required, func(tag *structtag.Tag) {
+			if tag.Name == "true" {
+				parameter.Required = true
+			}
+		})
+		getTag(tags, uriTag, func(tag *structtag.Tag) {
+			parameter = openapi3.NewPathParameter(tag.Name)
+			// Path parameters are always required
+			parameter.Required = true
+		})
+		getTag(tags, pathTag, func(tag *structtag.Tag) {
+			parameter = openapi3.NewPathParameter(tag.Name)
+			// Path parameters are always required
+			parameter.Required = true
+		})
 
 		if parameter.In == "" {
 			continue
