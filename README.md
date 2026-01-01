@@ -1,243 +1,233 @@
-# Swagger + Gin = SwaGin
+# OpenDoc - Go OpenAPI 文档生成工具
 
-[![deploy](https://github.com/long2ice/swagin/actions/workflows/deploy.yml/badge.svg)](https://github.com/long2ice/swagin/actions/workflows/deploy.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/long2ice/swagin.svg)](https://pkg.go.dev/github.com/long2ice/swagin)
+## 简介
 
-**If you use [Fiber](https://github.com/gofiber/fiber), you can try my another similar
-project [Fibers](https://github.com/long2ice/fibers).**
+`OpenDoc` 是一个用于 Go 项目的 OpenAPI 文档生成工具，它能够自动生成符合 OpenAPI 3.0 规范的 API 文档，并提供请求模型验证功能。该项目与具体 HTTP 框架无关，可以与任何 HTTP 框架（Gin、Echo、Fiber 等）一起使用，提供了一套完整的 API 文档解决方案。
 
-## Introduction
+## 特性
 
-`SwaGin` is a web framework based on `Gin` and `Swagger`, which wraps `Gin` and provides built-in swagger api docs and
-request model validation.
+- 自动生成 OpenAPI 3.0 规范的 API 文档
+- 支持多种安全认证方式（Basic、Bearer、ApiKey、OpenID、OAuth2）
+- 请求参数自动验证和模型映射
+- 支持服务分组和路由管理
+- 提供 Swagger UI、Redoc 和 RapiDoc 文档展示
+- 支持子应用挂载和独立文档
+- 可在生产环境中禁用文档功能
+- 与 HTTP 框架无关，可集成到任何 Go HTTP 项目
 
-## Why I build this project?
-
-Previous I have used [FastAPI](https://github.com/tiangolo/fastapi), which gives me a great experience in api docs
-generation, because nobody like writing api docs.
-
-Now I use `Gin` but I can't found anything like that, I found [swag](https://github.com/swaggo/swag) but which write
-docs with comment is so stupid. So there is `SwaGin`.
-
-## Installation
+## 安装
 
 ```shell
-go get -u github.com/long2ice/swagin
+go get -u github.com/pubgo/opendoc
 ```
 
-## Online Demo
+## 快速开始
 
-You can see online demo at <https://swagin.long2ice.io/docs> or <https://swagin.long2ice.io/redoc>.
-
-![](https://raw.githubusercontent.com/long2ice/swagin/dev/images/docs.png)
-![](https://raw.githubusercontent.com/long2ice/swagin/dev/images/redoc.png)
-
-And you can reference all usage in [examples](https://github.com/long2ice/swagin/tree/dev/examples).
-
-## Usage
-
-### Build Swagger
-
-Firstly, build a swagger object with basic information.
-
-```go
-package examples
-
-import (
-  "github.com/getkin/kin-openapi/openapi3"
-  "github.com/long2ice/swagin/swagger"
-)
-
-func NewSwagger() *swagger.Swagger {
-  return swagger.New("SwaGin", "Swagger + Gin = SwaGin", "0.1.0",
-    swagger.License(&openapi3.License{
-      Name: "Apache License 2.0",
-      URL:  "https://github.com/long2ice/swagin/blob/dev/LICENSE",
-    }),
-    swagger.Contact(&openapi3.Contact{
-      Name:  "long2ice",
-      URL:   "https://github.com/long2ice",
-      Email: "long2ice@gmail.com",
-    }),
-    swagger.TermsOfService("https://github.com/long2ice"),
-  )
-}
-```
-
-### Write API
-
-Then write a router function.
-
-```go
-package examples
-
-type TestQuery struct {
-  Name string `query:"name" validate:"required" json:"name" description:"name of model" default:"test"`
-}
-
-func TestQuery(c *gin.Context, req TestQueryReq) error {
-  return c.JSON(req)
-}
-
-// TestQueryNoReq if there is no req body and query
-func TestQueryNoReq(c *gin.Context) {
-  c.JSON(http.StatusOK, "{}")
-}
-```
-
-Note that the attributes in `TestQuery`? `SwaGin` will validate request and inject it automatically, then you can use it
-in handler easily.
-
-### Write Router
-
-Then write router with some docs configuration and api.
-
-```go
-package examples
-
-var query = router.New(
-  TestQuery,
-  router.Summary("Test Query"),
-  router.Description("Test Query Model"),
-  router.Tags("Test"),
-)
-
-// if there is no req body, you need use router.NewX
-var query = router.NewX(
-  TestQueryNoReq,
-  router.Summary("Test Query"),
-  router.Description("Test Query Model"),
-  router.Tags("Test"),
-)
-```
-
-### Security
-
-If you want to project your api with a security policy, you can use security, also they will be shown in swagger docs.
-
-Current there is five kinds of security policies.
-
-- `Basic`
-- `Bearer`
-- `ApiKey`
-- `OpenID`
-- `OAuth2`
-
-```go
-package main
-
-var query = router.New(
-  TestQuery,
-  router.Summary("Test query"),
-  router.Description("Test query model"),
-  router.Security(&security.Basic{}),
-)
-```
-
-Then you can get the authentication string by `context.MustGet(security.Credentials)` depending on your auth type.
-
-```go
-package main
-
-func TestQuery(c *gin.Context) {
-  user := c.MustGet(security.Credentials).(*security.User)
-  fmt.Println(user)
-  c.JSON(http.StatusOK, t)
-}
-```
-
-### Mount Router
-
-Then you can mount router in your application or group.
-
-```go
-package main
-
-func main() {
-  app := swagin.New(NewSwagger())
-  queryGroup := app.Group("/query", swagin.Tags("Query"))
-  queryGroup.GET("", query)
-  queryGroup.GET("/:id", queryPath)
-  queryGroup.DELETE("", query)
-  app.GET("/noModel", noModel)
-}
-
-```
-
-### Start APP
-
-Finally, start the application with routes defined.
+以下是一个简单的使用示例：
 
 ```go
 package main
 
 import (
-  "github.com/gin-contrib/cors"
-  "github.com/long2ice/swagin"
+	"fmt"
+	"net/http"
+
+	"github.com/samber/lo"
+
+	"github.com/pubgo/opendoc/opendoc"
+	"github.com/pubgo/opendoc/security"
+	"github.com/pubgo/opendoc/templates"
 )
 
+type TestQueryReq struct {
+	ID       int     `path:"id" validate:"required" json:"id" description:"id of model" default:"1"`
+	Name     string  `required:"true" json:"name" validate:"required" doc:"name of model" default:"test"`
+	Name1    *string `required:"true" json:"name1" validate:"required" doc:"name1 of model" default:"test"`
+	Token    string  `header:"token" json:"token" default:"test"`
+	Optional string  `query:"optional" json:"optional"`
+}
+
+type TestQueryRsp struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Data any    `json:"data"`
+}
+
 func main() {
-  app := swagin.New(NewSwagger())
-  app.Use(cors.New(cors.Config{
-    AllowOrigins:     []string{"*"},
-    AllowMethods:     []string{"*"},
-    AllowHeaders:     []string{"*"},
-    AllowCredentials: true,
-  }))
+	doc := opendoc.New(func(swag *opendoc.Swagger) {
+		swag.Title = "this service web title "
+		swag.Description = "this is description"
+		swag.License = &opendoc.License{
+			Name: "Apache License 2.0",
+			URL:  "https://github.com/pubgo/opendoc/blob/master/LICENSE",
+		}
 
-  queryGroup := app.Group("/query", swagin.Tags("Query"))
-  queryGroup.GET("", query)
-  queryGroup.GET("/:id", queryPath)
-  queryGroup.DELETE("", query)
+		swag.Contact = &opendoc.Contact{
+			Name:  "barry",
+			URL:   "https://github.com/pubgo/opendoc",
+			Email: "kooksee@163.com",
+		}
 
-  formGroup := app.Group("/form", swagin.Tags("Form"))
-  formGroup.POST("/encoded", formEncode)
-  formGroup.PUT("", body)
+		swag.TermsOfService = "https://github.com/pubgo"
+	})
 
-  app.GET("/noModel", noModel)
-  app.POST("/body", body)
-  if err := app.Run(); err != nil {
-    panic(err)
-  }
+	doc.ServiceOf("test article service", func(srv *opendoc.Service) {
+		srv.SetPrefix("/api/v1")
+		srv.AddSecurity(security.Basic{}, security.Bearer{})
+		srv.PostOf(func(op *opendoc.Operation) {
+			op.SetPath("/articles")
+			op.SetOperation("article_create")
+			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
+			op.SetSummary("create article")
+		})
+
+		srv.GetOf(func(op *opendoc.Operation) {
+			op.SetPath("/articles")
+			op.SetOperation("article_list")
+			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
+			op.SetSummary("get article list")
+			op.AddResponse("Test", new(TestQueryReq))
+		})
+
+		srv.PutOf(func(op *opendoc.Operation) {
+			op.SetPath("/articles/{id}")
+			op.SetOperation("article_update")
+			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
+			op.SetSummary("update article")
+		})
+
+		srv.DeleteOf(func(op *opendoc.Operation) {
+			op.SetPath("/articles/{id}")
+			op.SetOperation("article_delete")
+			op.SetModel(new(TestQueryReq), new(TestQueryRsp))
+			op.SetSummary("delete article")
+		})
+	})
+
+	http.HandleFunc("/docs/", templates.SwaggerHandler("API Documentation", "/openapi.json"))
+	http.HandleFunc("/redoc/", templates.ReDocHandler("API Documentation", "/openapi.json"))
+	http.HandleFunc("/rapidoc/", templates.RApiDocHandler("/openapi.json"))
+	http.HandleFunc("/openapi.json", func(w http.ResponseWriter, r *http.Request) {
+		swagger := doc.BuildSwagger()
+		w.Header().Set("Content-Type", "application/json")
+		_ = swagger.MarshalJSON()
+	})
+
+	fmt.Println("Server starting at :8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		panic(err)
+	}
 }
 ```
 
-That's all! Now you can visit <http://127.0.0.1:8080/docs> or <http://127.0.0.1:8080/redoc> to see the api docs. Have
-fun!
+## 核心概念
 
-### Disable Docs
+### Swagger 配置
 
-In some cases you may want to disable docs such as in production, just put `nil` to `swagin.New`.
+使用 `opendoc.New()` 创建 Swagger 实例，可以配置项目的基本信息：
 
 ```go
-app = swagin.New(nil)
+doc := opendoc.New(func(swag *opendoc.Swagger) {
+    swag.Title = "API Title"
+    swag.Description = "API Description"
+    swag.Version = "1.0.0"
+    swag.License = &opendoc.License{
+        Name: "Apache License 2.0",
+        URL:  "https://license-url"
+    }
+    swag.Contact = &opendoc.Contact{
+        Name:  "Contact Name",
+        URL:   "https://contact-url",
+        Email: "contact@example.com"
+    }
+})
 ```
 
-### SubAPP Mount
+### 服务定义
 
-If you want to use sub application, you can mount another `SwaGin` instance to main application, and their swagger docs
-is also separate.
+使用 `ServiceOf` 方法定义服务组：
 
 ```go
-package main
+doc.ServiceOf("service-name", func(srv *opendoc.Service) {
+    srv.SetPrefix("/api/v1")  // 设置路由前缀
+    srv.AddTags("User", "Account")  // 添加标签
+    srv.AddSecurity(security.Basic{})  // 添加安全认证
+})
+```
 
-func main() {
-  app := swagin.New(NewSwagger())
-  subApp := swagin.New(NewSwagger())
-  subApp.GET("/noModel", noModel)
-  app.Mount("/sub", subApp)
+### 操作定义
+
+在服务中定义 API 操作：
+
+```go
+srv.GetOf(func(op *opendoc.Operation) {
+    op.SetPath("/users")
+    op.SetOperation("get_users")
+    op.SetModel(requestStruct, responseStruct)
+    op.SetSummary("获取用户列表")
+    op.SetDescription("获取所有用户信息")
+})
+```
+
+### 安全认证
+
+OpenDoc 支持多种安全认证方式：
+
+- `security.Basic{}` - HTTP Basic 认证
+- `security.Bearer{}` - Bearer Token 认证
+- `security.ApiKey{}` - API Key 认证
+- `security.OpenID{}` - OpenID Connect 认证
+- `security.OAuth2{}` - OAuth2 认证
+
+```go
+srv.AddSecurity(security.Basic{}, security.Bearer{})
+```
+
+## 参数映射
+
+OpenDoc 支持多种参数映射方式：
+
+- `path` - 路径参数
+- `query` - 查询参数
+- `header` - 请求头参数
+- `cookie` - Cookie 参数
+- `json` - JSON 请求体参数
+
+```go
+type RequestStruct struct {
+    ID     int    `path:"id" validate:"required" json:"id"`
+    Name   string `query:"name" validate:"required" json:"name"`
+    Token  string `header:"authorization" json:"token"`
+    Locale string `cookie:"locale" json:"locale"`
 }
-
 ```
 
-## ThanksTo
+## 与其他 HTTP 框架集成
 
-- [kin-openapi](https://github.com/getkin/kin-openapi), OpenAPI 3.0 implementation for Go (parsing, converting,
-  validation, and more).
-- [Gin](https://github.com/gin-gonic/gin), an HTTP web framework written in Go (Golang).
+OpenDoc 与 HTTP 框架无关，可以轻松集成到任何 Go HTTP 框架中，如 Gin、Echo、Fiber 等。只需将 OpenDoc 生成的 OpenAPI 规范提供给相应的 HTTP 框架即可。
 
-## License
+## 文档模板
 
-This project is licensed under the
-[Apache-2.0](https://github.com/long2ice/swagin/blob/master/LICENSE)
-License.
+OpenDoc 提供了多种文档展示模板：
+
+- Swagger UI - 标准的 Swagger 文档界面
+- Redoc - 现代化的 API 文档界面
+- RapiDoc - 快速、轻量级的文档界面
+
+## 构建和运行
+
+使用以下命令运行示例：
+
+```bash
+make run-example
+```
+
+或者直接运行：
+
+```bash
+go run internal/examples/*.go
+```
+
+## 许可证
+
+该项目根据 [Apache-2.0](https://github.com/pubgo/opendoc/blob/master/LICENSE) 许可证授权。
